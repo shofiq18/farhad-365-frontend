@@ -8,11 +8,15 @@ import { RootState } from "@/redux/store";
 import { logout } from "@/feature/user/userSlice";
 import {
   Menu, X, User as UserIcon, LogOut,
-  LayoutDashboard, Search, Heart, ShoppingBag,
+  LayoutDashboard, Search, Heart, ShoppingBag, Truck,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useGetCategoriesQuery } from "@/redux/api/category/categoryApi";
 import { useGetProductSuggestionsQuery } from "@/redux/api/product/productApi";
+import { toggleDrawer } from "@/redux/cartSlice";
+import { toggleWishlistDrawer } from "@/redux/wishlistSlice";
+import CartDrawer from "./CartDrawer";
+import WishlistDrawer from "./WishlistDrawer";
 
 type NavItem = "men" | "women" | "kids" | "accessories" | null;
 
@@ -38,9 +42,13 @@ export default function Navbar() {
   const router = useRouter();
 
   const { user } = useSelector((state: RootState) => state.user);
+  const { items } = useSelector((state: RootState) => state.cart);
+  const { items: wishlistItems } = useSelector((state: RootState) => state.wishlist);
   const dispatch = useDispatch();
+  const wishlistItemsCount = wishlistItems.length;
   const { data: categoriesData } = useGetCategoriesQuery();
   const categories: any[] = categoriesData?.data ?? [];
+  const cartItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   // Debounce search value
   useEffect(() => {
@@ -396,47 +404,63 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-              <button className="hover:opacity-60 transition cursor-pointer p-1.5 text-black">
+              <button 
+                onClick={() => dispatch(toggleWishlistDrawer(true))}
+                className="relative hover:opacity-60 transition cursor-pointer p-1.5 text-black"
+              >
                 <Heart className="h-5 w-5" />
+                {wishlistItemsCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-black text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center border border-white">
+                    {wishlistItemsCount}
+                  </span>
+                )}
               </button>
-              <button className="hover:opacity-60 transition cursor-pointer p-1.5 text-black">
+              <button 
+                onClick={() => dispatch(toggleDrawer(true))}
+                className="relative hover:opacity-60 transition cursor-pointer p-1.5 text-black"
+              >
                 <ShoppingBag className="h-5 w-5" />
+                {cartItemsCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-black text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center border border-white">
+                    {cartItemsCount}
+                  </span>
+                )}
               </button>
               {user && (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowDropdown(!showDropdown)}
-                    className="flex items-center justify-center h-8 w-8 rounded-full border border-black hover:bg-gray-50 transition cursor-pointer"
-                  >
-                    <UserIcon className="h-4 w-4" />
-                  </button>
-                  {showDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 rounded-xl border border-gray-200 bg-white p-2 shadow-lg z-50">
-                      {(user.role === "ADMIN" || user.role === "SUPERADMIN" || user.role === "SUPER_ADMIN") && (
-                        <Link
-                          href="/dashboard"
-                          onClick={() => setShowDropdown(false)}
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition"
-                        >
-                          <LayoutDashboard className="h-4 w-4 text-gray-500" />
-                          Dashboard
-                        </Link>
-                      )}
-                      <button
-                        onClick={handleLogout}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[13px] font-semibold text-red-600 hover:bg-red-50 transition cursor-pointer"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <Link
+                  href="/profile"
+                  className="relative hover:opacity-60 transition cursor-pointer p-1.5 text-black"
+                  title="My Account"
+                >
+                  <UserIcon className="h-5 w-5" />
+                </Link>
               )}
             </div>
 
             {/* Mobile Button */}
-            <div className="flex md:hidden">
+            <div className="flex md:hidden items-center space-x-2">
+              <button 
+                onClick={() => dispatch(toggleWishlistDrawer(true))}
+                className="relative hover:opacity-60 transition cursor-pointer p-2 text-black"
+              >
+                <Heart className="h-6 w-6" />
+                {wishlistItemsCount > 0 && (
+                  <span className="absolute top-0.5 right-0.5 bg-black text-white text-[9px] font-bold h-4.5 w-4.5 rounded-full flex items-center justify-center border border-white">
+                    {wishlistItemsCount}
+                  </span>
+                )}
+              </button>
+              <button 
+                onClick={() => dispatch(toggleDrawer(true))}
+                className="relative hover:opacity-60 transition cursor-pointer p-2 text-black"
+              >
+                <ShoppingBag className="h-6 w-6" />
+                {cartItemsCount > 0 && (
+                  <span className="absolute top-0.5 right-0.5 bg-black text-white text-[9px] font-bold h-4.5 w-4.5 rounded-full flex items-center justify-center border border-white">
+                    {cartItemsCount}
+                  </span>
+                )}
+              </button>
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 transition cursor-pointer"
@@ -594,6 +618,8 @@ export default function Navbar() {
           </div>
         )}
       </nav>
+      <CartDrawer />
+      <WishlistDrawer />
     </div>
   );
 }

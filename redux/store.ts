@@ -13,6 +13,8 @@ import {
 import baseApi from "./api/baseApi";
 import createWebStorage from "redux-persist/es/storage/createWebStorage";
 import userReducer  from "../feature/user/userSlice"
+import cartReducer from "./cartSlice"
+import wishlistReducer from "./wishlistSlice"
 
 const createNoopStorage = () => ({
   getItem() {
@@ -39,6 +41,8 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   user: userReducer,
+  cart: cartReducer,
+  wishlist: wishlistReducer,
   [baseApi.reducerPath]: baseApi.reducer,
 });
 

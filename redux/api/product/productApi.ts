@@ -40,6 +40,28 @@ export const productApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Product"],
     }),
+    getProductBySlug: builder.query<any, string>({
+      query: (slug) => ({
+        url: `/products/${slug}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, slug) => [{ type: "Product", id: slug }],
+    }),
+    getProductReviews: builder.query<any, string>({
+      query: (productId) => ({
+        url: `/products/${productId}/reviews`,
+        method: "GET",
+      }),
+      providesTags: (result, error, productId) => [{ type: "Product", id: `reviews-${productId}` }],
+    }),
+    createReview: builder.mutation<any, { productId: string; rating: number; comment: string }>({
+      query: ({ productId, rating, comment }) => ({
+        url: `/products/${productId}/reviews`,
+        method: "POST",
+        body: { rating, comment },
+      }),
+      invalidatesTags: (result, error, { productId }) => [{ type: "Product", id: `reviews-${productId}` }],
+    }),
   }),
 });
 
@@ -49,4 +71,7 @@ export const {
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  useGetProductBySlugQuery,
+  useGetProductReviewsQuery,
+  useCreateReviewMutation,
 } = productApi;

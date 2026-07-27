@@ -345,8 +345,12 @@ export default function ShopPage() {
                       href={`/products/${product.slug}`}
                       className="group flex flex-col"
                     >
-                      {/* Product Image — fixed 507px height */}
-                      <div className="w-full h-[507px] bg-gray-100 overflow-hidden mb-3 flex-shrink-0">
+                      {/* Product Image — responsive height, taller when no sidebar */}
+                      <div className={`w-full overflow-hidden mb-3 flex-shrink-0 bg-gray-100 ${
+                        showFilters
+                          ? "h-[320px] sm:h-[420px] lg:h-[507px]"
+                          : "h-[320px] sm:h-[420px] lg:h-[540px] xl:h-[600px]"
+                      }`}>
                         {product.images?.[0] ? (
                           <img
                             src={product.images[0]}
@@ -370,10 +374,10 @@ export default function ShopPage() {
                           {discountedPrice ? (
                             <>
                               <span className="text-sm font-bold text-black">
-                                ${discountedPrice.toFixed(2)}
+                                ৳{discountedPrice.toLocaleString()}
                               </span>
                               <span className="text-sm text-gray-400 line-through">
-                                ${product.price.toFixed(2)}
+                                ৳{product.price.toLocaleString()}
                               </span>
                               <span className="text-xs font-bold text-red-600">
                                 {product.discount}% OFF
@@ -381,7 +385,7 @@ export default function ShopPage() {
                             </>
                           ) : (
                             <span className="text-sm font-bold text-black">
-                              ${product.price.toFixed(2)}
+                              ৳{product.price.toLocaleString()}
                             </span>
                           )}
                         </div>
