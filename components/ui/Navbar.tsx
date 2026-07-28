@@ -21,11 +21,11 @@ import WishlistDrawer from "./WishlistDrawer";
 type NavItem = "men" | "women" | "kids" | "accessories" | null;
 
 const NAV_LINKS: { label: string; key: NavItem; targetGroup?: string; href?: string }[] = [
-  { label: "New & Featured", key: null, href: "/shop" },
   { label: "Men",           key: "men",         targetGroup: "MEN" },
   { label: "Women",         key: "women",        targetGroup: "WOMEN" },
   { label: "Kids",          key: "kids",         targetGroup: "KIDS" },
   { label: "Accessories",   key: "accessories" },
+  { label: "Back to School", key: null, href: "/shop" },
   { label: "Sale",          key: null, href: "/shop?maxPrice=500" },
 ];
 
@@ -230,16 +230,12 @@ export default function Navbar() {
       <div className="hidden sm:block border-b border-gray-200 bg-[#f5f5f5] py-1.5 text-[11px] font-bold text-[#111111]">
         <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 flex justify-between items-center">
           <div className="flex items-center space-x-3.5">
-            <svg className="h-5 w-5 fill-current text-black hover:opacity-70 transition cursor-pointer" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-            </svg>
-            <span className="h-3 w-[1px] bg-gray-300" />
-            <svg className="h-5 w-5 fill-current text-black hover:opacity-70 transition cursor-pointer" viewBox="0 0 24 24">
+            {/* <svg className="h-5 w-5 fill-current text-black hover:opacity-70 transition cursor-pointer" viewBox="0 0 24 24">
               <path d="M12 2L2 22h20L12 2zm0 3.99L19.53 19H4.47L12 5.99z" />
-            </svg>
+            </svg> */}
           </div>
           <div className="flex items-center space-x-3.5">
-            <Link href="/store-locator" className="hover:text-gray-500">Find a Store</Link>
+            <Link href="/blog" className="hover:text-gray-500">Blog</Link>
             <span className="h-3.5 w-[1px] bg-gray-300" />
             <Link href="/help" className="hover:text-gray-500">Help</Link>
             <span className="h-3.5 w-[1px] bg-gray-300" />
@@ -267,10 +263,17 @@ export default function Navbar() {
 
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Link href="/">
-                <span className="text-2xl font-black italic tracking-tighter text-[#111111] uppercase">
-                  FARHAD365
-                </span>
+              <Link href="/" className="flex items-center group">
+                <svg className="h-10 w-16 text-[#111111] group-hover:scale-105 transition-transform duration-200" viewBox="0 0 115 90" xmlns="http://www.w3.org/2000/svg">
+                  {/* Stripe 1 */}
+                  <path d="M10,75 C16,73 26,65 36,50 C44,40 32,32 45,22 C55,14 75,10 95,5 C80,10 65,18 55,28 C45,38 55,45 45,55 C35,65 22,72 10,75 Z" fill="currentColor" />
+                  {/* Stripe 2 */}
+                  <path d="M15,78 C21,76 31,68 41,53 C49,43 37,35 50,25 C60,17 80,13 100,8 C85,13 70,21 60,31 C50,41 60,48 50,58 C40,68 27,75 15,78 Z" fill="currentColor" />
+                  {/* Stripe 3 */}
+                  <path d="M20,81 C26,79 36,71 46,56 C54,46 42,38 55,28 C65,20 85,16 105,11 C90,16 75,24 65,34 C55,44 65,51 55,61 C45,71 32,78 20,81 Z" fill="currentColor" />
+                  {/* Stripe 4 */}
+                  <path d="M25,84 C31,82 41,74 51,59 C59,49 47,41 60,31 C70,23 90,19 110,14 C95,19 80,27 70,37 C60,47 70,54 60,64 C50,74 37,81 25,84 Z" fill="currentColor" />
+                </svg>
               </Link>
             </div>
 

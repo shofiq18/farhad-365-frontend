@@ -1,117 +1,497 @@
+"use client";
+
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Truck, ShieldCheck, HeartHandshake, Award } from "lucide-react";
+import { useState, useRef } from "react";
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Truck, 
+  ShieldCheck, 
+  HeartHandshake, 
+  Award, 
+  Loader2,
+  Heart
+} from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { toggleWishlist } from "@/redux/wishlistSlice";
+import { useGetCategoriesQuery } from "@/redux/api/category/categoryApi";
+import { useGetProductsQuery } from "@/redux/api/product/productApi";
+
+// Curated high-quality Nike-style lifestyle imagery for the three core categories
+const CATEGORY_IMAGE_MAP: Record<string, string> = {
+  men: "https://images.unsplash.com/photo-1483721310020-03333e577076?q=80&w=800",
+  women: "https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?q=80&w=800",
+  accessories: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800",
+};
+
+// Fallback silhouettes if database is empty
+const STATIC_TRENDING_FALLBACKS = [
+  { name: "Air Jordan 1", link: "/shop?search=Jordan", image: "https://images.unsplash.com/photo-1597045566677-8cf032ed6634?q=80&w=250" },
+  { name: "Air Max", link: "/shop?search=Air%20Max", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=250" },
+  { name: "Graphic Tees", link: "/shop?search=Tee", image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=250" },
+  { name: "Dunk", link: "/shop?search=Dunk", image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=250" },
+  { name: "Air Force 1", link: "/shop?search=Air%20Force", image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?q=80&w=250" },
+  { name: "24.7 Collection", link: "/shop?search=Sweatshirt", image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=250" },
+  { name: "Vomero 5", link: "/shop?search=Vomero", image: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=250" },
+  { name: "Sport Ready", link: "/shop", image: "https://images.unsplash.com/photo-1514989940723-e8e5163ccbe8?q=80&w=250" },
+  { name: "ACG", link: "/shop?search=ACG", image: "https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=250" },
+  { name: "Pegasus", link: "/shop?search=Pegasus", image: "https://images.unsplash.com/photo-1582588678413-dbf45f4823e9?q=80&w=250" },
+  { name: "Vomero Plus", link: "/shop?search=Vomero", image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?q=80&w=250" },
+  { name: "Metcon", link: "/shop?search=Metcon", image: "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?q=80&w=250" },
+  { name: "School Essential", link: "/shop?search=Backpack", image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=250" },
+  { name: "Jordan Retro", link: "/shop?search=Jordan", image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=250" },
+  { name: "Sabrina 4", link: "/shop?search=Sabrina", image: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?q=80&w=250" },
+  { name: "Tatum 4", link: "/shop?search=Tatum", image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=250" },
+];
 
 export default function Home() {
-  const categories = [
-    { name: "Men's Collection", desc: "Engineered for maximum movement and performance.", link: "/products?target=MEN" },
-    { name: "Women's Collection", desc: "Designed for support, style, and everyday comfort.", link: "/products?target=WOMEN" },
-    { name: "Kids Wear", desc: "Lightweight and durable styles for non-stop action.", link: "/products?target=KIDS" },
-    { name: "Unisex Streetwear", desc: "Iconic silhouettes built for everyone, everywhere.", link: "/products?target=UNISEX" }
+  const dispatch = useDispatch();
+  const wishlistItems = useSelector((state: RootState) => state.wishlist.items);
+  
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useGetCategoriesQuery();
+  const { data: productsData, isLoading: isProductsLoading } = useGetProductsQuery({ limit: 16 });
+  
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [scrollPosition, setScrollPosition] = useState(0);
+
+  const rawCategories = categoriesData?.data ?? [];
+  const productsList = productsData?.data ?? [];
+
+  // Filter root categories matching Men, Women, Accessories dynamically
+  const menCat = rawCategories.find(
+    (c: any) => !c.parentId && c.slug.toLowerCase().includes("men")
+  );
+  const womenCat = rawCategories.find(
+    (c: any) => !c.parentId && c.slug.toLowerCase().includes("women")
+  );
+  const accCat = rawCategories.find(
+    (c: any) => 
+      !c.parentId && 
+      (c.slug.toLowerCase().includes("access") || 
+       c.slug.toLowerCase().includes("other") || 
+       c.slug.toLowerCase().includes("shoe") || 
+       c.slug.toLowerCase().includes("bag"))
+  );
+
+  // Helper function to resolve dynamic product image fallback for a category
+  const getProductImageFallback = (catSlug: string, catId?: string) => {
+    if (productsList.length > 0 && catId) {
+      const match = productsList.find((p: any) => p.categoryId === catId || p.category?.slug === catSlug);
+      if (match && match.images?.[0]) return match.images[0];
+    }
+    return CATEGORY_IMAGE_MAP[catSlug] || CATEGORY_IMAGE_MAP.accessories;
+  };
+
+  // Define the exact 3 cards matching Nike landing page section
+  const displayCategories = [
+    {
+      id: menCat?.id || "fallback-men",
+      name: "Shop Men's",
+      slug: "men",
+      shopUrl: menCat ? `/shop?category=${menCat.slug}` : "/shop?targetGroup=MEN",
+      image: menCat ? getProductImageFallback(menCat.slug, menCat.id) : CATEGORY_IMAGE_MAP.men
+    },
+    {
+      id: womenCat?.id || "fallback-women",
+      name: "Shop Women's",
+      slug: "women",
+      shopUrl: womenCat ? `/shop?category=${womenCat.slug}` : "/shop?targetGroup=WOMEN",
+      image: womenCat ? getProductImageFallback(womenCat.slug, womenCat.id) : CATEGORY_IMAGE_MAP.women
+    },
+    {
+      id: accCat?.id || "fallback-accessories",
+      name: "Shop Accessories",
+      slug: "accessories",
+      shopUrl: accCat ? `/shop?category=${accCat.slug}` : "/shop?category=accessories",
+      image: accCat ? getProductImageFallback(accCat.slug, accCat.id) : CATEGORY_IMAGE_MAP.accessories
+    }
   ];
 
+  const handleScroll = (direction: "left" | "right") => {
+    if (!carouselRef.current) return;
+    const scrollAmount = 340;
+    const currentScroll = carouselRef.current.scrollLeft;
+    
+    const targetScroll = 
+      direction === "left" 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+        
+    carouselRef.current.scrollTo({
+      left: targetScroll,
+      behavior: "smooth"
+    });
+    setScrollPosition(targetScroll);
+  };
+
+  const isWishlisted = (productId: string) => {
+    return wishlistItems.some((item) => item.id === productId);
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent, product: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    dispatch(toggleWishlist({
+      id: product.id,
+      title: product.title,
+      slug: product.slug,
+      price: product.price,
+      discount: product.discount,
+      image: product.images?.[0] || null,
+      categoryName: product.category?.name || "Sportswear",
+      targetGroup: product.targetGroup || "UNISEX"
+    }));
+  };
+
+  // Build the dynamic trending list using the database products
+  const dynamicTrendingItems = productsList.map((product: any) => ({
+    name: product.title,
+    link: `/products/${product.slug}`,
+    image: product.images?.[0] || null,
+  })).filter((item: any) => item.image !== null);
+
+  const displayTrending = dynamicTrendingItems.length > 0 ? dynamicTrendingItems : STATIC_TRENDING_FALLBACKS;
+
   return (
-    <div className="bg-white text-black pb-24 font-sans antialiased">
+    <div className="bg-white text-black font-sans antialiased">
       
-      {/* Nike Thin Header Promo Bar - Full Width bg */}
-      <div className="bg-[#f5f5f5] py-2.5 text-center text-xs font-semibold text-black border-b border-gray-200 w-full">
-        <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16">
-          <p>
-            Free Shipping & Returns <span className="font-normal">| Join Us To Get Free Shipping & 30-Day Returns.</span>{" "}
-            <Link href="/sign-up" className="underline font-bold hover:text-gray-600 ml-1">Learn More</Link>
-          </p>
+      {/* ── PROMO BANNER BAR (NIKE STYLE BACK TO SCHOOL SALE) ── */}
+      <div className="bg-[#111111] text-[#9eff00] py-6 border-b border-zinc-900 w-full select-none font-sans">
+        <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          
+          {/* 1. Left Block */}
+          <div className="text-sm md:text-[16px] font-semibold tracking-wider uppercase">
+            BACK TO SCHOOL SALE
+          </div>
+
+          {/* 2. Middle Block (contains 2 divs with justify-between) */}
+          <div className="flex items-center justify-between gap-12 md:gap-24 w-full max-w-[450px]">
+            {/* Text sub-div */}
+            <div className="text-left leading-tight">
+              <div className="text-xs md:text-[15px] font-black uppercase tracking-wider">EXTRA 25% OFF</div>
+              <div className="text-[10px] md:text-[15px] font-extrabold uppercase tracking-widest text-[#9eff00]">SELECT STYLES</div>
+            </div>
+            
+            {/* Logo sub-div */}
+            <div className="flex items-center">
+              <svg className="h-10 w-16 text-[#9eff00] hover:scale-105 transition-transform duration-200" viewBox="0 0 115 90" xmlns="http://www.w3.org/2000/svg">
+                {/* Stripe 1 */}
+                <path d="M10,75 C16,73 26,65 36,50 C44,40 32,32 45,22 C55,14 75,10 95,5 C80,10 65,18 55,28 C45,38 55,45 45,55 C35,65 22,72 10,75 Z" fill="currentColor" />
+                {/* Stripe 2 */}
+                <path d="M15,78 C21,76 31,68 41,53 C49,43 37,35 50,25 C60,17 80,13 100,8 C85,13 70,21 60,31 C50,41 60,48 50,58 C40,68 27,75 15,78 Z" fill="currentColor" />
+                {/* Stripe 3 */}
+                <path d="M20,81 C26,79 36,71 46,56 C54,46 42,38 55,28 C65,20 85,16 105,11 C90,16 75,24 65,34 C55,44 65,51 55,61 C45,71 32,78 20,81 Z" fill="currentColor" />
+                {/* Stripe 4 */}
+                <path d="M25,84 C31,82 41,74 51,59 C59,49 47,41 60,31 C70,23 90,19 110,14 C95,19 80,27 70,37 C60,47 70,54 60,64 C50,74 37,81 25,84 Z" fill="currentColor" />
+              </svg>
+            </div>
+          </div>
+
+          {/* 3. Right Block */}
+          <div className="text-sm md:text-[15px] font-black tracking-wider uppercase">
+            CODE: DAYONE
+          </div>
+
         </div>
       </div>
 
-      {/* Nike Full-Width Hero Section (Edge-to-Edge Image/Banner) */}
-      <section className="w-full">
-        
-        {/* Large Hero Image - Edge to edge */}
-        <div className="relative w-full aspect-[21/9] md:aspect-[2.3/1] overflow-hidden bg-zinc-100">
-          <Image
-            src="/nike_hero_athletic.png"
-            alt="Nike Athletic Wear Collection Banner"
-            fill
-            priority
-            className="object-cover"
-          />
+      {/* ── HERO BANNER SECTION ── */}
+      <section className="w-full relative">
+        <div className="relative w-full aspect-[21/9] md:aspect-[2.3/1] min-h-[400px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/10 z-10" />
+          {/* Full-screen background video */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover object-center select-none"
+          >
+            <source src="/videos/gym.mp4" type="video/mp4" />
+          </video>
+          
+          <div className="relative z-20 mx-auto w-full max-w-[1920px] px-6 md:px-12 lg:px-16 pb-12 md:pb-20 text-white">
+            <span className="text-[12px] md:text-sm font-black tracking-widest text-[#f5f5f5] uppercase mb-3 block">
+              Just Released
+            </span>
+            <h1 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-6 max-w-4xl drop-shadow-sm">
+              WIN ON YOUR TERMS
+            </h1>
+            <p className="text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-8 font-medium drop-shadow-sm">
+              Step into limitlessness with our brand new seasonal collections. Engineered with lightweight, premium fabrics designed for peak movement and performance.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/shop"
+                className="rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-3 px-8 text-xs font-bold tracking-wider uppercase border border-white"
+              >
+                Shop Collection
+              </Link>
+              <Link
+                href="/shop?targetGroup=WOMEN"
+                className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-3 px-8 text-xs font-bold tracking-wider uppercase border-2 border-white"
+              >
+                Shop Women&#39;s
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── EXACT NIKE STYLE CATEGORY GRID (3 CORE CARDS) ── */}
+      <section id="categories" className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-20 scroll-mt-16">
+        <div className="text-center mb-12">
+          <h2 className="text-5xl md:text-7xl font-black tracking-tight text-black uppercase leading-none select-none" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+            BEST IN CLASS
+          </h2>
+          <p className="text-xs md:text-sm font-semibold text-zinc-900 mt-4 max-w-2xl mx-auto leading-relaxed">
+            From class to sport, find back-to-school essentials for day one and beyond.
+          </p>
         </div>
 
-        {/* Hero Title & Description block - 1920 centered */}
-        <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 text-center mt-8 flex flex-col items-center">
-          <span className="text-[12px] font-bold tracking-widest text-[#111111] uppercase mb-2">
-            Just In
+        {isCategoriesLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="animate-spin h-8 w-8 text-black" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {displayCategories.map((cat) => (
+              <div 
+                key={cat.id} 
+                className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 shadow-sm cursor-pointer"
+              >
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+                  loading="lazy"
+                />
+
+                <div className="absolute bottom-8 left-8 z-20">
+                  <Link
+                    href={cat.shopUrl}
+                    className="inline-block text-white font-semibold text-xl md:text-2xl hover:text-zinc-300 transition duration-300 tracking-wide cursor-pointer"
+                  >
+                    {cat.name}
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ── DYNAMIC POPULAR RIGHT NOW PRODUCTS GRID ── */}
+      <section className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-28 mb-28">
+        <div className="mb-8">
+          <h2 className="text-2xl md:text-3xl font-black tracking-tight text-black uppercase">
+            Popular Right Now
+          </h2>
+        </div>
+
+        {isProductsLoading ? (
+          <div className="flex justify-center items-center py-24">
+            <Loader2 className="animate-spin h-8 w-8 text-black" />
+          </div>
+        ) : productsList.length === 0 ? (
+          <div className="border border-dashed border-gray-300 rounded-2xl text-center py-20 bg-gray-50">
+            <p className="text-gray-400 text-sm font-semibold">No products found. Please add products in the dashboard.</p>
+            <Link href="/shop" className="inline-block mt-4 text-xs font-bold underline uppercase hover:text-gray-600">
+              Go to shop page
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {productsList.slice(0, 4).map((product: any) => {
+              const discountedPrice =
+                product.discount > 0
+                  ? product.price * (1 - product.discount / 100)
+                  : null;
+
+              return (
+                <div 
+                  key={product.id}
+                  className="w-full group flex flex-col relative cursor-pointer"
+                >
+                  {/* Image container */}
+                  <div className="relative w-full aspect-[4/5] bg-gray-100 overflow-hidden mb-4 border border-zinc-100 cursor-pointer">
+                    {product.images?.[0] ? (
+                      <img
+                        src={product.images[0]}
+                        alt={product.title}
+                        className="w-full h-full object-cover select-none cursor-pointer"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-zinc-200 flex items-center justify-center text-zinc-400 text-xs">
+                        No Image
+                      </div>
+                    )}
+                    
+                    {/* Quick Redirect Cover Link */}
+                    <Link href={`/products/${product.slug}`} className="absolute inset-0 z-10 cursor-pointer" aria-label={product.title} />
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex flex-col">
+                    <p className="text-[11px] font-semibold text-gray-400 tracking-wider">
+                      {product.category?.name || "Sportswear"}
+                    </p>
+                    <Link 
+                      href={`/products/${product.slug}`}
+                      className="text-[15px] font-medium text-black truncate mt-0.5 cursor-pointer"
+                    >
+                      {product.title}
+                    </Link>
+                    
+                    <div className="flex items-center gap-2 mt-1.5">
+                      {discountedPrice ? (
+                        <>
+                          <span className="text-sm font-bold text-black">
+                            ৳{discountedPrice.toLocaleString()}
+                          </span>
+                          <span className="text-xs text-gray-400 line-through">
+                            ৳{product.price.toLocaleString()}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-sm font-bold text-black">
+                          ৳{product.price.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* ── FULL WIDTH VIDEO SECTOR ── */}
+      <section className="w-full aspect-[16/9] md:aspect-[21/9] bg-black relative overflow-hidden select-none">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        >
+          <source src="/videos/running.mp4" type="video/mp4" />
+        </video>
+        {/* Subtle gradient overlay — heavier at bottom for text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent z-10" />
+        {/* Left-aligned editorial text overlay */}
+        <div className="absolute inset-0 z-20 flex flex-col justify-end px-6 md:px-16 lg:px-24 pb-14 md:pb-20 text-white">
+          <span className="text-[10px] md:text-xs font-black tracking-[0.3em] uppercase text-zinc-300 mb-3 block">
+            FARHAD365 MOTION
           </span>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-[#111111] uppercase select-none leading-none mb-4">
-            MOVE. STYLE. ELEVATE.
-          </h1>
-          <p className="text-[14px] md:text-[15px] leading-relaxed text-[#757575] font-semibold max-w-2xl mb-8">
-            Experience the peak of performance and comfort. Explore our new season gear and activewear engineered for limitlessness and everyday versatility.
+          <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase leading-none mb-4 max-w-2xl">
+            MOVEMENT<br />IS LIFE
+          </h2>
+          <p className="text-xs md:text-sm text-zinc-300 max-w-sm leading-relaxed mb-7 font-normal">
+            Engineered to keep you moving forward. Performance activewear crafted for speed, agility, and recovery.
           </p>
-          <div className="flex gap-3">
+          <div>
             <Link
-              href="/products"
-              className="rounded-full bg-black text-white hover:bg-zinc-800 transition-colors py-3 px-8 text-xs font-bold tracking-wider uppercase border border-black"
+              href="/shop"
+              className="inline-flex items-center gap-2 rounded-full bg-white text-black hover:bg-zinc-100 transition duration-300 py-3 px-8 text-xs font-bold tracking-wider uppercase"
             >
-              Shop Collection
+              Explore Activewear <span className="text-sm">→</span>
             </Link>
           </div>
         </div>
-
       </section>
 
-      {/* Nike "Trending" Split Section - 1920 width with padding */}
-      <section className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-16">
-        <h2 className="text-2xl font-bold tracking-tight text-black mb-6 left-aligned uppercase">
-          Trending
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* ── EXACT NIKE STYLE FEATURED CAMPAIGNS GRID ── */}
+      <section className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-24">
+        <div className="mb-8">
+          <h2 className="text-2xl md:text-3xl font-black tracking-tight text-black uppercase">
+            Featured
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
-          {/* Men's Trend Column */}
-          <div className="group relative flex flex-col justify-end min-h-[400px] md:min-h-[550px] overflow-hidden">
-            <Image
-              src="/nike_men_trend.png"
-              alt="Men's Running Apparel Collection"
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-103"
-            />
-            {/* Absolute redirect overlay */}
-            <Link href="/products?target=MEN" className="absolute inset-0 z-10" />
-            
-            {/* Bottom Left Card Description Overlay */}
-            <div className="absolute bottom-10 left-10 z-20 text-white space-y-3">
-              <span className="text-[11px] font-extrabold tracking-widest uppercase">Performance Gear</span>
-              <h3 className="text-2xl font-black uppercase tracking-tight">Men&#39;s Track & Field</h3>
+          {/* Campaign 1: Run Free */}
+          <div className="flex flex-col group cursor-pointer">
+            <div className="relative aspect-[4/5] overflow-hidden bg-zinc-100 shadow-sm cursor-pointer">
+              <img
+                src="https://images.unsplash.com/photo-1502904582529-347c341e184d?q=80&w=800"
+                alt="Run Free athletic campaign"
+                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+                loading="lazy"
+              />
+              <Link href="/shop?category=shoes" className="absolute inset-0 z-20 cursor-pointer" />
+            </div>
+            <div className="mt-5">
+              <h3 className="text-[15px] font-medium text-black tracking-tight cursor-pointer">
+                Run Free
+              </h3>
+              <p className="text-xs text-zinc-500 font-semibold leading-relaxed mt-1.5 max-w-[320px]">
+                Ultra-responsive road runners engineered to cushion and accelerate every single step.
+              </p>
               <Link 
-                href="/products?target=MEN" 
-                className="inline-block bg-white text-black hover:opacity-80 py-2.5 px-6 rounded-full text-xs font-bold tracking-wider uppercase"
+                href="/shop?category=shoes" 
+                className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-3.5 tracking-wide transition cursor-pointer"
               >
-                Shop Now
+                Shop Footwear
               </Link>
             </div>
           </div>
 
-          {/* Women's Trend Column */}
-          <div className="group relative flex flex-col justify-end min-h-[400px] md:min-h-[550px] overflow-hidden">
-            <Image
-              src="/nike_women_trend.png"
-              alt="Women's Workout Activewear Gear"
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-103"
-            />
-            {/* Absolute redirect overlay */}
-            <Link href="/products?target=WOMEN" className="absolute inset-0 z-10" />
-
-            {/* Bottom Left Card Description Overlay */}
-            <div className="absolute bottom-10 left-10 z-20 text-white space-y-3">
-              <span className="text-[11px] font-extrabold tracking-widest uppercase">New Release</span>
-              <h3 className="text-2xl font-black uppercase tracking-tight">Women&#39;s Active Training</h3>
+          {/* Campaign 2: Street Style */}
+          <div className="flex flex-col group cursor-pointer">
+            <div className="relative aspect-[4/5] overflow-hidden bg-zinc-100 shadow-sm cursor-pointer">
+              <img
+                src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=800"
+                alt="Streetwear style campaign"
+                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+                loading="lazy"
+              />
+              <Link href="/shop?targetGroup=UNISEX" className="absolute inset-0 z-20 cursor-pointer" />
+            </div>
+            <div className="mt-5">
+              <h3 className="text-[15px] font-medium text-black tracking-tight cursor-pointer">
+                Street Essentials
+              </h3>
+              <p className="text-xs text-zinc-500 font-semibold leading-relaxed mt-1.5 max-w-[320px]">
+                Reimagined everyday basics designed to look completely effortless, anywhere and everywhere.
+              </p>
               <Link 
-                href="/products?target=WOMEN" 
-                className="inline-block bg-white text-black hover:opacity-80 py-2.5 px-6 rounded-full text-xs font-bold tracking-wider uppercase"
+                href="/shop?targetGroup=UNISEX" 
+                className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-3.5 tracking-wide transition cursor-pointer"
               >
-                Shop Now
+                Shop Streetwear
+              </Link>
+            </div>
+          </div>
+
+          {/* Campaign 3: Gym Gear */}
+          <div className="flex flex-col group cursor-pointer">
+            <div className="relative aspect-[4/5] overflow-hidden bg-zinc-100 shadow-sm cursor-pointer">
+              <img
+                src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800"
+                alt="Gym recovery training gear"
+                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+                loading="lazy"
+              />
+              <Link href="/shop?category=clothing" className="absolute inset-0 z-20 cursor-pointer" />
+            </div>
+            <div className="mt-5">
+              <h3 className="text-[15px] font-medium text-black tracking-tight cursor-pointer">
+                Peak Recovery
+              </h3>
+              <p className="text-xs text-zinc-500 font-semibold leading-relaxed mt-1.5 max-w-[320px]">
+                Sweat-wicking performance clothing built to withstand high-intensity reps and active training.
+              </p>
+              <Link 
+                href="/shop?category=clothing" 
+                className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-3.5 tracking-wide transition cursor-pointer"
+              >
+                Shop Training
               </Link>
             </div>
           </div>
@@ -119,107 +499,148 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Category Pills & Quick Section - 1920 width with padding */}
-      <section id="categories" className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-20 scroll-mt-16">
-        
-        {/* Pills Selector */}
-        <div className="flex flex-wrap justify-center gap-3 mb-16">
-          <Link 
-            href="/products?target=MEN" 
-            className="border border-black bg-white hover:bg-black hover:text-white text-[12px] font-bold tracking-wider py-3 px-10 rounded-full transition duration-300 cursor-pointer min-w-[120px] text-center"
-          >
-            Men
-          </Link>
-          <Link 
-            href="/products?target=WOMEN" 
-            className="border border-black bg-white hover:bg-black hover:text-white text-[12px] font-bold tracking-wider py-3 px-10 rounded-full transition duration-300 cursor-pointer min-w-[120px] text-center"
-          >
-            Women
-          </Link>
-          <Link 
-            href="/products?target=KIDS" 
-            className="border border-black bg-white hover:bg-black hover:text-white text-[12px] font-bold tracking-wider py-3 px-10 rounded-full transition duration-300 cursor-pointer min-w-[120px] text-center"
-          >
-            Kids
-          </Link>
+
+      {/* ── BACK TO SCHOOL SECTION ── */}
+      <section className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-28 mb-28">
+        <div className="text-center mb-12 select-none">
+          <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-black uppercase leading-none" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+            BACK TO SCHOOL
+          </h2>
+          <p className="text-xs md:text-sm font-semibold text-zinc-600 mt-4 max-w-2xl mx-auto leading-relaxed">
+            Mix and match with ease, because every piece plays.
+          </p>
         </div>
 
-        {/* Categories Grid (Clean Monochrome Cards) */}
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {categories.map((cat, idx) => (
-            <div
-              key={idx}
-              className="flex flex-col justify-between p-8 rounded-none border border-black bg-white transition duration-300 hover:shadow-lg group"
-            >
-              <div>
-                <h3 className="text-lg font-bold text-black mb-3">{cat.name}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed mb-8">{cat.desc}</p>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1: Jordan Kids */}
+          <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer">
+            <img
+              src="https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?q=80&w=800"
+              alt="Jordan Kids"
+              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10 cursor-pointer" />
+            <div className="relative z-20 p-8 flex flex-col items-start justify-end h-full text-white cursor-pointer">
+              <p className="text-[17px] font-bold leading-snug mb-4 max-w-[260px] cursor-pointer">
+                Bring serious style to their everyday game.
+              </p>
               <Link
-                href={cat.link}
-                className="inline-flex items-center gap-2 text-[12px] font-bold text-black hover:opacity-75 transition-opacity"
+                href="/shop?search=Jordan"
+                className="bg-white text-black text-xs font-bold px-5 py-2.5 rounded-full hover:bg-zinc-200 transition-colors uppercase tracking-wider cursor-pointer"
               >
-                Shop Now
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 duration-200" />
+                Jordan Kids
               </Link>
             </div>
+            <Link href="/shop?search=Jordan" className="absolute inset-0 z-30 cursor-pointer" />
+          </div>
+
+          {/* Card 2: Bags & Backpacks */}
+          <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer">
+            <img
+              src="https://images.unsplash.com/photo-1576243345690-4e4b79b63288?q=80&w=800"
+              alt="Bags & Backpacks"
+              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10 cursor-pointer" />
+            <div className="relative z-20 p-8 flex flex-col items-start justify-end h-full text-white cursor-pointer">
+              <p className="text-[17px] font-bold leading-snug mb-4 max-w-[260px] cursor-pointer">
+                Find the perfect bag for carrying their gear comfortably.
+              </p>
+              <Link
+                href="/shop?category=accessories&search=bag"
+                className="bg-white text-black text-xs font-bold px-5 py-2.5 rounded-full hover:bg-zinc-200 transition-colors uppercase tracking-wider cursor-pointer"
+              >
+                Bags & Backpacks
+              </Link>
+            </div>
+            <Link href="/shop?category=accessories&search=bag" className="absolute inset-0 z-30 cursor-pointer" />
+          </div>
+
+          {/* Card 3: Nike Kids */}
+          <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer">
+            <img
+              src="https://images.unsplash.com/photo-1519457431-44ccd64a579b?q=80&w=800"
+              alt="Nike Kids"
+              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10 cursor-pointer" />
+            <div className="relative z-20 p-8 flex flex-col items-start justify-end h-full text-white cursor-pointer">
+              <p className="text-[17px] font-bold leading-snug mb-4 max-w-[260px] cursor-pointer">
+                Elevate their school style with essentials for the classroom and sport.
+              </p>
+              <Link
+                href="/shop?targetGroup=KIDS"
+                className="bg-white text-black text-xs font-bold px-5 py-2.5 rounded-full hover:bg-zinc-200 transition-colors uppercase tracking-wider cursor-pointer"
+              >
+                Nike Kids
+              </Link>
+            </div>
+            <Link href="/shop?targetGroup=KIDS" className="absolute inset-0 z-30 cursor-pointer" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── DYNAMIC NIKE "TRENDING" SILHOUETTE GRID (NO BACKGROUND / TRANSPARENT) ── */}
+      <section className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-28 mb-28 select-none">
+        <div className="text-center mb-12">
+          <h2 className="text-5xl md:text-7xl font-black tracking-tight text-black uppercase leading-none select-none" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+            TRENDING
+          </h2>
+        </div>
+
+        {/* 2 Rows of 8 items on desktop, wraps cleanly on tablet/mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-x-6 gap-y-12 mt-12">
+          {displayTrending.slice(0, 16).map((item: any, index: number) => (
+            <Link 
+              key={index} 
+              href={item.link} 
+              className="flex flex-col items-center group text-center cursor-pointer"
+            >
+              {/* Image box - bg-transparent, no borders, no padding except standard spacing */}
+              <div className="w-full aspect-[4/3] bg-transparent flex items-center justify-center overflow-hidden cursor-pointer">
+                <img
+                  src={item.image || ""}
+                  alt={item.name}
+                  className="max-h-[75px] max-w-[110px] object-contain select-none mix-blend-multiply cursor-pointer"
+                  loading="lazy"
+                />
+              </div>
+              {/* Label */}
+              <span className="text-[15px] font-medium text-black mt-3 transition truncate max-w-full cursor-pointer">
+                {item.name}
+              </span>
+            </Link>
           ))}
         </div>
-
       </section>
 
-      {/* Nike Vibe Value Props - 1920 width with padding */}
-      <section className="bg-zinc-50 border-y border-zinc-100 py-20 mt-20">
-        <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16">
-          <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
-            
-            {/* Feature 1 */}
-            <div className="flex gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-none bg-black text-white">
-                <Truck className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-black">Fast Shipping</h3>
-                <p className="mt-2 text-xs text-gray-500 leading-relaxed">Quick and trackable delivery directly to your door.</p>
-              </div>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="flex gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-none bg-black text-white">
-                <ShieldCheck className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-black">Secure Checkout</h3>
-                <p className="mt-2 text-xs text-gray-500 leading-relaxed">Your data is secured using advanced encryption standard.</p>
-              </div>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="flex gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-none bg-black text-white">
-                <HeartHandshake className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-black">Expert Support</h3>
-                <p className="mt-2 text-xs text-gray-500 leading-relaxed">Our support crew is active 24/7 to solve queries.</p>
-              </div>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="flex gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-none bg-black text-white">
-                <Award className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-black">Premium Quality</h3>
-                <p className="mt-2 text-xs text-gray-500 leading-relaxed">Selected high-performance materials for durability.</p>
-              </div>
-            </div>
-
+      {/* ── BRAND STATEMENT SECTION (ADIDAS TEXT LAYOUT) ── */}
+      <section className="bg-black text-white py-20 text-center relative overflow-hidden select-none border-t border-zinc-900">
+        <div className="mx-auto max-w-5xl px-6 flex flex-col items-start">
+          <h2 className="text-xl md:text-3xl font-black uppercase tracking-widest mb-6" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+            Fashion, Fragrance, Timepieces & Sports 
+          </h2>
+          <div className="text-xs md:text-base text-zinc-200 space-y-4 max-w-4xl leading-relaxed text-start font-normal">
+            <p>
+              Farhad365 is your all-in-one lifestyle destination. We bring together the very best in fashion clothing, luxury perfumes, premium watches and the latest sportswear — so you never have to shop anywhere else. Whether you're refreshing your wardrobe with the latest seasonal styles, finding a signature scent, investing in a timepiece that turns heads, or gearing up for your next workout, Farhad365 has you covered for every occasion and every mood.
+            </p>
+            <p>
+              Explore our clothing collection featuring everyday essentials and statement pieces for Men, Women and Kids. Discover a curated selection of perfumes and fragrances from around the world — from fresh and light to bold and intense. Browse our watch collection for elegant dress watches, smart sports watches and everything in between. And now, step into our expanding sports range with performance sneakers, activewear and accessories designed for training, running and beyond. One brand. Every lifestyle. Farhad365.
+            </p>
           </div>
+          {/* Farhad365 brand icon — 3 slanted stripes */}
+          <svg className="h-8 w-12 text-white fill-current mx-auto mt-8" viewBox="0 0 24 24">
+            <rect x="4" y="4" width="3.5" height="16" transform="skewX(-28)" />
+            <rect x="11" y="4" width="3.5" height="16" transform="skewX(-28)" />
+            <rect x="18" y="4" width="3.5" height="16" transform="skewX(-28)" />
+          </svg>
         </div>
       </section>
+
+      
 
     </div>
   );
