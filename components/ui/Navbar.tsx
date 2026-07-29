@@ -18,15 +18,15 @@ import { toggleWishlistDrawer } from "@/redux/wishlistSlice";
 import CartDrawer from "./CartDrawer";
 import WishlistDrawer from "./WishlistDrawer";
 
-type NavItem = "men" | "women" | "kids" | "accessories" | null;
+type NavItem = "men" | "women" | "kids" | "school" | "sports" | "accessories" | null;
 
 const NAV_LINKS: { label: string; key: NavItem; targetGroup?: string; href?: string }[] = [
-  { label: "Men",           key: "men",         targetGroup: "MEN" },
-  { label: "Women",         key: "women",        targetGroup: "WOMEN" },
-  { label: "Kids",          key: "kids",         targetGroup: "KIDS" },
-  { label: "Accessories",   key: "accessories" },
-  { label: "Back to School", key: null, href: "/shop" },
-  { label: "Sale",          key: null, href: "/shop?maxPrice=500" },
+  { label: "Men",            key: "men",         targetGroup: "MEN" },
+  { label: "Women",          key: "women",        targetGroup: "WOMEN" },
+  { label: "Kids",           key: "kids",         targetGroup: "KIDS" },
+  { label: "Back to School", key: "school",       targetGroup: "SCHOOL" },
+  { label: "Sale",           key: null, href: "/shop?maxPrice=500" },
+  { label: "Sports",         key: "sports",       targetGroup: "SPORTS" },
 ];
 
 export default function Navbar() {
@@ -142,16 +142,22 @@ export default function Navbar() {
           { label: "Sale",            href: `/shop?maxPrice=500` },
         ];
 
-    // Chunk filtered categories into max 4 columns
-    const MAX_COLS = 4;
-    const chunkSize = Math.max(1, Math.ceil(filteredCategories.length / MAX_COLS));
-    const columns: any[][] = [];
-    for (let i = 0; i < filteredCategories.length; i += chunkSize) {
-      columns.push(filteredCategories.slice(i, i + chunkSize));
-    }
+    // Order: Clothing first, Footwear second, Accessories third, then others
+    const categoryOrder = ["clothing", "footwear", "accessories"];
+    const orderedCategories = [...filteredCategories].sort((a: any, b: any) => {
+      const idxA = categoryOrder.indexOf(a.slug?.toLowerCase());
+      const idxB = categoryOrder.indexOf(b.slug?.toLowerCase());
+      if (idxA !== -1 && idxB === -1) return -1;
+      if (idxA === -1 && idxB !== -1) return 1;
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      return a.name.localeCompare(b.name);
+    });
+
+    // Create a column for each top-level category
+    const columns = orderedCategories.map((cat) => [cat]);
 
     // Show nothing if no categories match
-    if (!filteredCategories.length) return null;
+    if (!orderedCategories.length) return null;
 
     return (
       <div
@@ -288,7 +294,7 @@ export default function Navbar() {
                     <Link
                       key={nav.label}
                       href={href}
-                      className="text-[14px] font-semibold text-[#111111] hover:opacity-70 transition-opacity py-5"
+                      className="text-[16px] font-semibold text-[#111111] hover:opacity-70 transition-opacity py-5"
                     >
                       {nav.label}
                     </Link>
@@ -304,7 +310,7 @@ export default function Navbar() {
                   >
                     <Link
                       href={href}
-                      className={`text-[14px] font-semibold text-[#111111] py-5 border-b-2 transition ${
+                      className={`text-[16px] font-semibold text-[#111111] py-5 border-b-2 transition ${
                         activeMegaMenu === nav.key ? "border-black" : "border-transparent hover:opacity-70"
                       }`}
                     >

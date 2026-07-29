@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -10,7 +10,9 @@ import {
   HeartHandshake, 
   Award, 
   Loader2,
-  Heart
+  Heart,
+  Play,
+  Pause
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -20,9 +22,9 @@ import { useGetProductsQuery } from "@/redux/api/product/productApi";
 
 // Curated high-quality Nike-style lifestyle imagery for the three core categories
 const CATEGORY_IMAGE_MAP: Record<string, string> = {
-  men: "https://images.unsplash.com/photo-1483721310020-03333e577076?q=80&w=800",
-  women: "https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?q=80&w=800",
-  accessories: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800",
+  men: "/men2.jpg",
+  women: "/women.avif",
+  accessories: "/purfume.webp",
 };
 
 // Fallback silhouettes if database is empty
@@ -45,6 +47,38 @@ const STATIC_TRENDING_FALLBACKS = [
   { name: "Tatum 4", link: "/shop?search=Tatum", image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=250" },
 ];
 
+const SPECIAL_CAROUSEL_SLIDES = [
+  {
+    image: "/corousal2.webp",
+    subtitle: "The best hoopers know greatness isn't built overnight—it's forged rep after rep, detail by detail.",
+    link: "/shop?targetGroup=SPORTS",
+  },
+  {
+    image: "/corousal1.webp",
+     title: "THE STANDARD IS SET",
+    subtitle: "Experience next-level cushioning and support engineered for daily runners and active athletes.",
+    link: "/shop?category=shoes",
+  },
+  {
+    image: "/corousal3.webp",
+    title: "ELEVATE YOUR WORKOUT",
+    subtitle: "Premium performance sportswear designed for maximum flexibility, breathability, and comfort.",
+    link: "/shop?targetGroup=WOMEN",
+  },
+  {
+    image: "/corousal4.webp",
+    title: "DOMINATE THE STAGE",
+    subtitle: "Unmatched speed meets elite comfort. Push your boundaries and exceed your goals daily.",
+    link: "/shop?targetGroup=MEN",
+  },
+  {
+    image: "/corousal6.webp",
+    title: "PURFUMES",
+    subtitle: "Unmatched speed meets elite comfort. Push your boundaries and exceed your goals daily.",
+    link: "/shop?targetGroup=MEN",
+  },
+];
+
 export default function Home() {
   const dispatch = useDispatch();
   const wishlistItems = useSelector((state: RootState) => state.wishlist.items);
@@ -54,6 +88,39 @@ export default function Home() {
   
   const carouselRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (!isPlaying) {
+      setProgress(0);
+      return;
+    }
+
+    const intervalTime = 50; // ms
+    const totalTime = 5000; // ms
+    const step = (intervalTime / totalTime) * 100;
+
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          return 100;
+        }
+        return prev + step;
+      });
+    }, intervalTime);
+
+    return () => clearInterval(timer);
+  }, [isPlaying, currentSlide]);
+
+  useEffect(() => {
+    if (progress >= 100) {
+      setCurrentSlide((prev) => (prev + 1) % SPECIAL_CAROUSEL_SLIDES.length);
+      setProgress(0);
+    }
+  }, [progress]);
 
   const rawCategories = categoriesData?.data ?? [];
   const productsList = productsData?.data ?? [];
@@ -230,10 +297,10 @@ export default function Home() {
                 Shop Collection
               </Link>
               <Link
-                href="/shop?targetGroup=WOMEN"
+                href="/shop?targetGroup=MEN"
                 className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-3 px-8 text-xs font-bold tracking-wider uppercase border-2 border-white"
               >
-                Shop Women&#39;s
+                Shop Men&#39;s
               </Link>
             </div>
           </div>
@@ -419,11 +486,11 @@ export default function Home() {
           <div className="flex flex-col group cursor-pointer">
             <div className="relative aspect-[4/5] overflow-hidden bg-zinc-100 shadow-sm cursor-pointer">
               <img
-                src="https://images.unsplash.com/photo-1502904582529-347c341e184d?q=80&w=800"
-                alt="Run Free athletic campaign"
-                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
-                loading="lazy"
-              />
+              src="/run free.avif"
+              alt="Jordan Kids"
+              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+              loading="lazy"
+            />
               <Link href="/shop?category=shoes" className="absolute inset-0 z-20 cursor-pointer" />
             </div>
             <div className="mt-5">
@@ -446,7 +513,7 @@ export default function Home() {
           <div className="flex flex-col group cursor-pointer">
             <div className="relative aspect-[4/5] overflow-hidden bg-zinc-100 shadow-sm cursor-pointer">
               <img
-                src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=800"
+                src="/men.jpg"
                 alt="Streetwear style campaign"
                 className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
                 loading="lazy"
@@ -473,8 +540,8 @@ export default function Home() {
           <div className="flex flex-col group cursor-pointer">
             <div className="relative aspect-[4/5] overflow-hidden bg-zinc-100 shadow-sm cursor-pointer">
               <img
-                src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800"
-                alt="Gym recovery training gear"
+                src="/featured.avif"
+                alt="Jordan Kids"
                 className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
                 loading="lazy"
               />
@@ -499,6 +566,145 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── SPECIAL AUTOPLAY HERO CAROUSEL SECTION ── */}
+      <section className="w-full relative mt-20 select-none">
+        <div className="relative w-full aspect-[21/9] md:aspect-[2.3/1] min-h-[450px] md:min-h-[550px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
+          
+          {/* Slides */}
+          {SPECIAL_CAROUSEL_SLIDES.map((slide, index) => {
+            const active = index === currentSlide;
+            return (
+              <div
+                key={index}
+                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+                  active ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                }`}
+              >
+                {/* Background Image */}
+                <img
+                  src={slide.image}
+                  alt={slide.title}
+                  className="absolute inset-0 w-full h-full object-cover object-center select-none"
+                />
+                
+                {/* Dark overlay for readability */}
+                <div className="absolute inset-0 bg-black/25" />
+
+                {/* Redirect whole slide to sports categories */}
+                <Link
+                  href="/shop?targetGroup=SPORTS"
+                  className="absolute inset-0 z-20 cursor-pointer"
+                  aria-label={`Shop ${slide.title}`}
+                />
+                
+                {/* Slide content */}
+                <div className="relative z-25 mx-auto w-full h-full flex flex-col justify-end pb-16 md:pb-24 text-white px-6 md:px-12 lg:px-16 pointer-events-none">
+                  <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase select-none leading-none mb-6 max-w-4xl drop-shadow-sm animate-fade-in" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+                    {slide.title}
+                  </h2>
+                  <p className="text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-8 font-medium drop-shadow-sm">
+                    {slide.subtitle}
+                  </p>
+                  <div>
+                    <div
+                      className="inline-block rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-3 px-8 text-xs font-bold tracking-wider uppercase border border-white"
+                    >
+                      Shop
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Controls overlay in the bottom right and dots in the bottom center */}
+          <div className="absolute bottom-6 left-0 right-0 z-30 flex items-center justify-between px-8 md:px-16 pointer-events-none">
+            {/* Center dots indicators */}
+            <div className="flex-1 flex justify-center gap-2 pointer-events-auto">
+              {SPECIAL_CAROUSEL_SLIDES.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setCurrentSlide(index);
+                    setProgress(0);
+                  }}
+                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    index === currentSlide ? "w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            {/* Bottom-right Controls */}
+            <div className="flex items-center gap-3 pointer-events-auto">
+              {/* Play/Pause Button with Circular Progress Ring */}
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="w-11 h-11 relative flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-all cursor-pointer backdrop-blur-sm"
+                aria-label={isPlaying ? "Pause autoplay" : "Start autoplay"}
+              >
+                {/* SVG Progress Ring */}
+                <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 44 44">
+                  {/* Background Track */}
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    className="stroke-white/20 fill-none"
+                    strokeWidth="2.5"
+                  />
+                  {/* Active Progress Path */}
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    className="stroke-white fill-none transition-all duration-75"
+                    strokeWidth="2.5"
+                    strokeDasharray="113.1"
+                    strokeDashoffset={113.1 - (progress / 100) * 113.1}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                {/* Icon (centered on top) */}
+                <div className="relative z-10 flex items-center justify-center">
+                  {isPlaying ? (
+                    <Pause className="h-4 w-4 fill-white text-white" />
+                  ) : (
+                    <Play className="h-4 w-4 fill-white text-white ml-0.5" />
+                  )}
+                </div>
+              </button>
+
+              {/* Prev Button */}
+              <button
+                onClick={() => {
+                  setCurrentSlide(
+                    (prev) => (prev - 1 + SPECIAL_CAROUSEL_SLIDES.length) % SPECIAL_CAROUSEL_SLIDES.length
+                  );
+                  setProgress(0);
+                }}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              {/* Next Button */}
+              <button
+                onClick={() => {
+                  setCurrentSlide((prev) => (prev + 1) % SPECIAL_CAROUSEL_SLIDES.length);
+                  setProgress(0);
+                }}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ── BACK TO SCHOOL SECTION ── */}
       <section className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-28 mb-28">
@@ -515,7 +721,7 @@ export default function Home() {
           {/* Card 1: Jordan Kids */}
           <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer">
             <img
-              src="https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?q=80&w=800"
+              src="/original.avif"
               alt="Jordan Kids"
               className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
               loading="lazy"
@@ -538,7 +744,7 @@ export default function Home() {
           {/* Card 2: Bags & Backpacks */}
           <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer">
             <img
-              src="https://images.unsplash.com/photo-1576243345690-4e4b79b63288?q=80&w=800"
+              src="/original (1).avif"
               alt="Bags & Backpacks"
               className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
               loading="lazy"
@@ -561,7 +767,7 @@ export default function Home() {
           {/* Card 3: Nike Kids */}
           <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer">
             <img
-              src="https://images.unsplash.com/photo-1519457431-44ccd64a579b?q=80&w=800"
+              src="/original (2).avif"
               alt="Nike Kids"
               className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
               loading="lazy"

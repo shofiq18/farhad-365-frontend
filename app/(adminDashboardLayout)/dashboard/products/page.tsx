@@ -478,6 +478,8 @@ export default function AdminProductsPage() {
                     <option value="KIDS">Kids</option>
                     <option value="UNISEX">Unisex</option>
                     <option value="OTHERS">Others</option>
+                    <option value="SCHOOL">School</option>
+                    <option value="SPORTS">Sports</option>
                   </select>
                 </div>
 

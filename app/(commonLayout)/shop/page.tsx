@@ -7,7 +7,7 @@ import { useGetCategoriesQuery } from "@/redux/api/category/categoryApi";
 import { ChevronDown, ChevronUp, SlidersHorizontal, X, Loader } from "lucide-react";
 import Link from "next/link";
 
-const TARGET_GROUPS = ["MEN", "WOMEN", "KIDS", "UNISEX"] as const;
+const TARGET_GROUPS = ["MEN", "WOMEN", "KIDS", "UNISEX", "SCHOOL", "SPORTS"] as const;
 const SORT_OPTIONS = [
   { label: "Newest", value: "newest" },
   { label: "Price: Low to High", value: "price_asc" },

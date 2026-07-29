@@ -10,7 +10,7 @@ import {
   useDeleteCategoryMutation,
 } from "@/redux/api/category/categoryApi";
 
-const ALL_GROUPS = ["MEN", "WOMEN", "KIDS", "UNISEX", "OTHERS"] as const;
+const ALL_GROUPS = ["MEN", "WOMEN", "KIDS", "UNISEX", "OTHERS", "SCHOOL", "SPORTS"] as const;
 type Group = (typeof ALL_GROUPS)[number];
 
 const GROUP_LABELS: Record<Group, string> = {
@@ -19,6 +19,8 @@ const GROUP_LABELS: Record<Group, string> = {
   KIDS: "Kids",
   UNISEX: "Unisex / All",
   OTHERS: "Accessories / Others",
+  SCHOOL: "School",
+  SPORTS: "Sports",
 };
 
 const GROUP_COLORS: Record<Group, string> = {
@@ -27,7 +29,10 @@ const GROUP_COLORS: Record<Group, string> = {
   KIDS:   "bg-yellow-100 text-yellow-700",
   UNISEX: "bg-gray-100 text-gray-600",
   OTHERS: "bg-purple-100 text-purple-700",
+  SCHOOL: "bg-orange-100 text-orange-700",
+  SPORTS: "bg-red-100 text-red-700",
 };
+
 
 interface FormState {
   name: string;
