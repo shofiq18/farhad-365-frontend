@@ -46,7 +46,7 @@ export default function WishlistDrawer() {
   if (!isWishlistOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-100 flex justify-end">
+    <div className="fixed inset-0 z-[100] flex justify-end">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-300 animate-in fade-in"

@@ -256,7 +256,8 @@ export default function Navbar() {
   };
 
   return (
-    <div className={`sticky top-0 w-full transition-transform duration-300 z-50 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
+    <>
+      <div className={`sticky top-0 w-full transition-transform duration-300 z-50 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
 
       {/* ── Top Bar ── */}
       <div className="hidden sm:block border-b border-gray-200 bg-[#f5f5f5] py-1.5 text-[11px] font-bold text-[#111111]">
@@ -646,8 +647,9 @@ export default function Navbar() {
           </div>
         )}
       </nav>
+      </div>
       <CartDrawer />
       <WishlistDrawer />
-    </div>
+    </>
   );
 }
