@@ -182,62 +182,6 @@ export default function ShopPage() {
               </button>
             )}
 
-            {/* CATEGORIES */}
-            <div className="border-b border-gray-200 pb-4 mb-4">
-              <button
-                onClick={() => toggleSection("categories")}
-                className="flex justify-between items-center w-full text-sm font-bold text-black mb-3 cursor-pointer"
-              >
-                Categories
-                {expandedSections.categories ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </button>
-              {expandedSections.categories && (
-                <div className="space-y-0.5">
-                  <button
-                    onClick={() => { setSelectedCategory(null); setPage(1); }}
-                    className={`block w-full text-left py-1.5 text-sm transition cursor-pointer ${
-                      !selectedCategory
-                        ? "font-bold text-black"
-                        : "text-gray-500 hover:text-black"
-                    }`}
-                  >
-                    All Products
-                  </button>
-                  {categoriesData?.data?.map((parent: any) => (
-                    <div key={parent.id}>
-                      <button
-                        onClick={() => { setSelectedCategory(parent.slug); setPage(1); }}
-                        className={`block w-full text-left py-1.5 text-sm font-semibold transition cursor-pointer ${
-                          selectedCategory === parent.slug || selectedCategory === parent.id
-                            ? "text-black font-bold"
-                            : "text-gray-500 hover:text-black"
-                        }`}
-                      >
-                        {parent.name}
-                      </button>
-                      {parent.children?.map((child: any) => (
-                        <button
-                          key={child.id}
-                          onClick={() => { setSelectedCategory(child.slug); setPage(1); }}
-                          className={`block w-full text-left py-1 pl-3 text-sm transition cursor-pointer ${
-                            selectedCategory === child.slug || selectedCategory === child.id
-                              ? "font-bold text-black"
-                              : "text-gray-400 hover:text-black"
-                          }`}
-                        >
-                          {child.name}
-                        </button>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
             {/* GENDER */}
             <div className="border-b border-gray-200 pb-4 mb-4">
               <button
@@ -269,6 +213,75 @@ export default function ShopPage() {
                       {g.charAt(0) + g.slice(1).toLowerCase()}
                     </button>
                   ))}
+                </div>
+              )}
+            </div>
+
+            {/* CATEGORIES */}
+            <div className="border-b border-gray-200 pb-4 mb-4">
+              <button
+                onClick={() => toggleSection("categories")}
+                className="flex justify-between items-center w-full text-sm font-bold text-black mb-3 cursor-pointer"
+              >
+                Categories
+                {expandedSections.categories ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </button>
+              {expandedSections.categories && (
+                <div className="space-y-0.5">
+                  <button
+                    onClick={() => { setSelectedCategory(null); setPage(1); }}
+                    className={`block w-full text-left py-1.5 text-sm transition cursor-pointer ${
+                      !selectedCategory
+                        ? "font-bold text-black"
+                        : "text-gray-500 hover:text-black"
+                    }`}
+                  >
+                    All Products
+                  </button>
+                  {(() => {
+                    const rawCats = categoriesData?.data ?? [];
+                    const categoryOrder = ["clothing", "footwear", "accessories"];
+                    const orderedCategories = [...rawCats].sort((a: any, b: any) => {
+                      const idxA = categoryOrder.indexOf(a.slug?.toLowerCase());
+                      const idxB = categoryOrder.indexOf(b.slug?.toLowerCase());
+                      if (idxA !== -1 && idxB === -1) return -1;
+                      if (idxA === -1 && idxB !== -1) return 1;
+                      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                      return a.name.localeCompare(b.name);
+                    });
+
+                    return orderedCategories.map((parent: any) => (
+                      <div key={parent.id}>
+                        <button
+                          onClick={() => { setSelectedCategory(parent.slug); setPage(1); }}
+                          className={`block w-full text-left py-1.5 text-sm font-semibold transition cursor-pointer ${
+                            selectedCategory === parent.slug || selectedCategory === parent.id
+                              ? "text-black font-bold"
+                              : "text-gray-500 hover:text-black"
+                          }`}
+                        >
+                          {parent.name}
+                        </button>
+                        {parent.children?.map((child: any) => (
+                          <button
+                            key={child.id}
+                            onClick={() => { setSelectedCategory(child.slug); setPage(1); }}
+                            className={`block w-full text-left py-1 pl-3 text-sm transition cursor-pointer ${
+                              selectedCategory === child.slug || selectedCategory === child.id
+                                ? "font-bold text-black"
+                                : "text-gray-400 hover:text-black"
+                            }`}
+                          >
+                            {child.name}
+                          </button>
+                        ))}
+                      </div>
+                    ));
+                  })()}
                 </div>
               )}
             </div>
@@ -355,7 +368,7 @@ export default function ShopPage() {
                           <img
                             src={product.images[0]}
                             alt={product.title}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover object-top"
                           />
                         ) : (
                           <div className="w-full h-full bg-gray-200" />

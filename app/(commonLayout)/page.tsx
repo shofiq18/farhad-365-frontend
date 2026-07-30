@@ -243,16 +243,11 @@ export default function Home() {
             
             {/* Logo sub-div */}
             <div className="flex items-center">
-              <svg className="h-10 w-16 text-[#9eff00] hover:scale-105 transition-transform duration-200" viewBox="0 0 115 90" xmlns="http://www.w3.org/2000/svg">
-                {/* Stripe 1 */}
-                <path d="M10,75 C16,73 26,65 36,50 C44,40 32,32 45,22 C55,14 75,10 95,5 C80,10 65,18 55,28 C45,38 55,45 45,55 C35,65 22,72 10,75 Z" fill="currentColor" />
-                {/* Stripe 2 */}
-                <path d="M15,78 C21,76 31,68 41,53 C49,43 37,35 50,25 C60,17 80,13 100,8 C85,13 70,21 60,31 C50,41 60,48 50,58 C40,68 27,75 15,78 Z" fill="currentColor" />
-                {/* Stripe 3 */}
-                <path d="M20,81 C26,79 36,71 46,56 C54,46 42,38 55,28 C65,20 85,16 105,11 C90,16 75,24 65,34 C55,44 65,51 55,61 C45,71 32,78 20,81 Z" fill="currentColor" />
-                {/* Stripe 4 */}
-                <path d="M25,84 C31,82 41,74 51,59 C59,49 47,41 60,31 C70,23 90,19 110,14 C95,19 80,27 70,37 C60,47 70,54 60,64 C50,74 37,81 25,84 Z" fill="currentColor" />
-              </svg>
+              <img 
+                src="/main-logo.jpg" 
+                alt="Farhad365 Logo" 
+                className="h-10 w-auto object-contain hover:scale-105 transition-transform duration-200 select-none" 
+              />
             </div>
           </div>
 
@@ -325,8 +320,9 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {displayCategories.map((cat) => (
-              <div 
+              <Link 
                 key={cat.id} 
+                href={cat.shopUrl}
                 className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 shadow-sm cursor-pointer"
               >
                 <img
@@ -337,14 +333,11 @@ export default function Home() {
                 />
 
                 <div className="absolute bottom-8 left-8 z-20">
-                  <Link
-                    href={cat.shopUrl}
-                    className="inline-block text-white font-semibold text-xl md:text-2xl hover:text-zinc-300 transition duration-300 tracking-wide cursor-pointer"
-                  >
+                  <span className="inline-block text-white font-semibold text-xl md:text-2xl hover:text-zinc-300 transition duration-300 tracking-wide cursor-pointer">
                     {cat.name}
-                  </Link>
+                  </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
@@ -388,7 +381,7 @@ export default function Home() {
                       <img
                         src={product.images[0]}
                         alt={product.title}
-                        className="w-full h-full object-cover select-none cursor-pointer"
+                        className="w-full h-full object-cover object-top select-none cursor-pointer"
                         loading="lazy"
                       />
                     ) : (
@@ -837,12 +830,12 @@ export default function Home() {
               Explore our clothing collection featuring everyday essentials and statement pieces for Men, Women and Kids. Discover a curated selection of perfumes and fragrances from around the world — from fresh and light to bold and intense. Browse our watch collection for elegant dress watches, smart sports watches and everything in between. And now, step into our expanding sports range with performance sneakers, activewear and accessories designed for training, running and beyond. One brand. Every lifestyle. Farhad365.
             </p>
           </div>
-          {/* Farhad365 brand icon — 3 slanted stripes */}
-          <svg className="h-8 w-12 text-white fill-current mx-auto mt-8" viewBox="0 0 24 24">
-            <rect x="4" y="4" width="3.5" height="16" transform="skewX(-28)" />
-            <rect x="11" y="4" width="3.5" height="16" transform="skewX(-28)" />
-            <rect x="18" y="4" width="3.5" height="16" transform="skewX(-28)" />
-          </svg>
+          {/* Farhad365 brand icon */}
+          <img 
+            src="/main-logo.jpg" 
+            alt="Farhad365 Logo" 
+            className="h-14 w-auto object-contain mx-auto mt-8 select-none" 
+          />
         </div>
       </section>
 

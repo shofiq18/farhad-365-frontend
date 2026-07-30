@@ -127,33 +127,74 @@ export default function ProductDetailsPage() {
 
   const variants = product.variants || [];
 
-  // Helper: Get unique colors
+  // Helper: Get unique colors, supporting comma-separated strings
   function getUniqueColors(vars: any[]) {
-    const list = vars.map((v) => v.color).filter(Boolean);
-    return Array.from(new Set(list)) as string[];
+    const set = new Set<string>();
+    vars.forEach((v) => {
+      if (v.color) {
+        v.color.split(",").forEach((c: string) => {
+          const trimmed = c.trim();
+          if (trimmed) set.add(trimmed);
+        });
+      }
+    });
+    return Array.from(set);
+  }
+
+  // Helper: Get unique sizes, supporting comma-separated strings
+  function getUniqueSizes(vars: any[]) {
+    const set = new Set<string>();
+    vars.forEach((v) => {
+      if (v.size) {
+        v.size.split(",").forEach((s: string) => {
+          const trimmed = s.trim();
+          if (trimmed) set.add(trimmed);
+        });
+      }
+    });
+    return Array.from(set);
   }
 
   const availableColors = getUniqueColors(variants);
+  const availableSizes = getUniqueSizes(variants);
 
-  // Filter variants by selected color (or all if no color variant is defined)
-  const colorFilteredVariants = selectedColor
-    ? variants.filter((v: any) => v.color === selectedColor)
-    : variants;
+  // Helper to check if a size exists for a color
+  const doesSizeExistForColor = (sizeVal: string, colorVal: string | null) => {
+    return variants.some((v: any) => {
+      const colorMatch = colorVal 
+        ? (v.color === colorVal || (v.color && v.color.split(",").map((c: string) => c.trim()).includes(colorVal)))
+        : true;
+      const sizeMatch = v.size === sizeVal || (v.size && v.size.split(",").map((s: string) => s.trim()).includes(sizeVal));
+      return colorMatch && sizeMatch;
+    });
+  };
 
-  // Get unique sizes for the active color variant selection
-  const sizeOptions = colorFilteredVariants.map((v: any) => ({
-    size: v.size,
-    stock: v.stock,
-    variantId: v.id,
-    price: v.price,
-  })).filter((o: any) => o.size);
+  // Helper to check if a size is available/in-stock for a color
+  const isSizeAvailableForColor = (sizeVal: string, colorVal: string | null) => {
+    return variants.some((v: any) => {
+      const colorMatch = colorVal 
+        ? (v.color === colorVal || (v.color && v.color.split(",").map((c: string) => c.trim()).includes(colorVal)))
+        : true;
+      const sizeMatch = v.size === sizeVal || (v.size && v.size.split(",").map((s: string) => s.trim()).includes(sizeVal));
+      return colorMatch && sizeMatch && v.stock > 0;
+    });
+  };
 
   // Find currently selected variant based on selected size & color
   const selectedVariant = variants.find((v: any) => {
-    const colorMatch = selectedColor ? v.color === selectedColor : true;
-    const sizeMatch = selectedSize ? v.size === selectedSize : true;
+    const colorMatch = selectedColor 
+      ? (v.color === selectedColor || (v.color && v.color.split(",").map((c: string) => c.trim()).includes(selectedColor)))
+      : true;
+    const sizeMatch = selectedSize 
+      ? (v.size === selectedSize || (v.size && v.size.split(",").map((s: string) => s.trim()).includes(selectedSize)))
+      : true;
     return colorMatch && sizeMatch;
-  }) || colorFilteredVariants[0];
+  }) || variants.find((v: any) => {
+    const colorMatch = selectedColor 
+      ? (v.color === selectedColor || (v.color && v.color.split(",").map((c: string) => c.trim()).includes(selectedColor)))
+      : true;
+    return colorMatch;
+  }) || variants[0];
 
   // Price calculations
   const basePrice = selectedVariant?.price !== null && selectedVariant?.price !== undefined 
@@ -166,7 +207,7 @@ export default function ProductDetailsPage() {
   // Handle Add to Bag
   const handleAddToBag = () => {
     // If sizing is applicable but none is selected
-    if (sizeOptions.length > 0 && !selectedSize) {
+    if (availableSizes.length > 0 && !selectedSize) {
       setSizeError(true);
       toast.error("Please select a size.");
       return;
@@ -187,8 +228,8 @@ export default function ProductDetailsPage() {
       price: basePrice,
       discount: product.discount,
       discountedPrice: discountedPrice,
-      size: selectedVariant.size || null,
-      color: selectedVariant.color || null,
+      size: selectedSize || selectedVariant.size || null,
+      color: selectedColor || selectedVariant.color || null,
       image: product.images?.[0] || null,
       quantity: 1,
       stock: selectedVariant.stock,
@@ -252,7 +293,7 @@ export default function ProductDetailsPage() {
                     activeImage === img ? "border-black scale-95" : "border-gray-200 hover:border-black"
                   }`}
                 >
-                  <img src={img} alt={`${product.title} view ${idx + 1}`} className="h-full w-full object-cover" />
+                  <img src={img} alt={`${product.title} view ${idx + 1}`} className="h-full w-full object-cover object-top" />
                 </button>
               ))}
             </div>
@@ -263,7 +304,7 @@ export default function ProductDetailsPage() {
                 <img
                   src={activeImage}
                   alt={product.title}
-                  className="w-full h-full object-cover transition duration-300 hover:scale-105"
+                  className="w-full h-full object-cover object-top transition duration-300 hover:scale-105"
                 />
               ) : (
                 <div className="text-gray-300 text-sm">No Image Available</div>
@@ -341,7 +382,7 @@ export default function ProductDetailsPage() {
             )}
 
             {/* Sizing Section */}
-            {sizeOptions.length > 0 && (
+            {availableSizes.length > 0 && (
               <div className="mb-8">
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="text-base font-bold text-black">
@@ -360,31 +401,37 @@ export default function ProductDetailsPage() {
 
                 {/* Sizing Grid (Nike grid style) */}
                 <div className="grid grid-cols-3 gap-2">
-                  {sizeOptions.map((opt: any, idx: number) => {
-                    const isOutOfStock = opt.stock === 0;
-                    const isSelected = selectedSize === opt.size;
+                  {availableSizes.map((sizeVal: string, idx: number) => {
+                    const exists = doesSizeExistForColor(sizeVal, selectedColor);
+                    const inStock = exists && isSizeAvailableForColor(sizeVal, selectedColor);
+                    const isSelected = selectedSize === sizeVal;
 
                     return (
                       <button
                         key={idx}
-                        disabled={isOutOfStock}
+                        disabled={!exists}
                         onClick={() => {
-                          setSelectedSize(opt.size);
+                          setSelectedSize(sizeVal);
                           setSizeError(false);
                         }}
                         className={`relative py-3.5 border text-xs font-bold transition flex items-center justify-center ${
-                          isOutOfStock
-                            ? "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed overflow-hidden"
+                          !exists
+                            ? "border-gray-100 bg-gray-50 text-gray-200 cursor-not-allowed opacity-40"
+                            : !inStock
+                            ? "border-gray-200 bg-gray-50 text-gray-300 cursor-not-allowed overflow-hidden"
                             : isSelected
                             ? "border-black bg-black text-white z-10"
                             : "border-gray-200 hover:border-black text-black bg-white cursor-pointer"
                         }`}
                       >
-                        {opt.size}
-                        {isOutOfStock && (
+                        {sizeVal}
+                        {!inStock && exists && (
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="w-[120%] h-[1px] bg-gray-200 rotate-12 absolute" />
                           </div>
+                        )}
+                        {!exists && (
+                          <span className="absolute bottom-0.5 text-[8px] text-gray-400 scale-75">N/A</span>
                         )}
                       </button>
                     );
@@ -576,7 +623,7 @@ export default function ProductDetailsPage() {
           ) : (
             <div className="border border-zinc-200 p-5 bg-zinc-50 mb-8 text-sm text-gray-600">
               <span className="font-bold text-black">Sign in</span> to write a review.{" "}
-              <a href="/login" className="underline font-bold text-black">Login here</a>.
+              <Link href={`/login?redirect=/products/${slug}`} className="underline font-bold text-black">Login here</Link>.
             </div>
           )}
 
@@ -634,7 +681,7 @@ export default function ProductDetailsPage() {
                       <img
                         src={p.images[0]}
                         alt={p.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-top"
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-200" />

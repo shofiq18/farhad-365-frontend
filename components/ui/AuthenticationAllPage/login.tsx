@@ -5,7 +5,7 @@ import { setCredentials } from "@/feature/user/userSlice";
 import { useLogInMutation } from "@/redux/api/auth/authApi";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-hot-toast";
@@ -34,6 +34,7 @@ export default function LoginForm() {
   const [error, setError] = useState("")
   const dispatch = useDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -86,8 +87,11 @@ export default function LoginForm() {
       toast.success("Login successfully");
       // console.log("Logged in user:", userFromToken);
 
+      const redirectUrl = searchParams.get("redirect") || searchParams.get("callbackUrl");
       if (userFromToken?.role === "ADMIN" || userFromToken?.role === "SUPERADMIN" || userFromToken?.role === "SUPER_ADMIN") {
         router.push("/dashboard");
+      } else if (redirectUrl) {
+        router.push(redirectUrl);
       } else {
         router.push("/");
       }

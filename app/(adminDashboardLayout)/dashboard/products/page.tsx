@@ -17,6 +17,8 @@ interface VariantInput {
   sku: string;
   stock: number;
   price?: number;
+  isCustomSize?: boolean;
+  isCustomColor?: boolean;
 }
 
 export default function AdminProductsPage() {
@@ -33,7 +35,8 @@ export default function AdminProductsPage() {
   const [discount, setDiscount] = useState("0");
   const [categoryId, setCategoryId] = useState("");
   const [targetGroup, setTargetGroup] = useState("UNISEX");
-  const [imagesFiles, setImagesFiles] = useState<FileList | null>(null);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [imagesFiles, setImagesFiles] = useState<File[]>([]);
   const [variants, setVariants] = useState<VariantInput[]>([
     { size: "", color: "", sku: "", stock: 10 }
   ]);
@@ -50,6 +53,146 @@ export default function AdminProductsPage() {
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
 
+  const getDynamicOptions = (catId: string, group: string) => {
+    const defaultRes = {
+      sizes: ["S", "M", "L", "XL", "XXL", "2XL"],
+      colors: [
+        "Black", "White", "Navy", "Blue", "Red", "Green", "Grey", 
+        "Yellow", "Pink", "Purple", "Orange", "Maroon", "Olive", 
+        "Beige", "Cream", "Mustard", "Multicolor"
+      ],
+      hasSize: true,
+      hasColor: true,
+      sizeLabel: "Size",
+      colorLabel: "Color"
+    };
+
+    if (!catId || !categoriesData?.data) {
+      return defaultRes;
+    }
+
+    // Find category
+    let selectedCat: any = null;
+    for (const parent of categoriesData.data) {
+      if (parent.id === catId) {
+        selectedCat = parent;
+        break;
+      }
+      const child = parent.children?.find((c: any) => c.id === catId);
+      if (child) {
+        selectedCat = child;
+        break;
+      }
+    }
+
+    if (!selectedCat) {
+      return defaultRes;
+    }
+
+    const slug = (selectedCat.slug || "").toLowerCase();
+    const name = (selectedCat.name || "").toLowerCase();
+
+    // Watches
+    if (slug.includes("watch") || name.includes("watch")) {
+      return {
+        sizes: [],
+        colors: ["Gold", "Silver", "Black", "Rose Gold", "Brown", "Grey", "Blue", "Steel"],
+        hasSize: false,
+        hasColor: true,
+        sizeLabel: "Size",
+        colorLabel: "Color"
+      };
+    }
+
+    // Perfumes
+    if (slug.includes("perfume") || name.includes("perfume")) {
+      return {
+        sizes: ["30 ml", "50 ml", "100 ml", "200 ml"],
+        colors: [],
+        hasSize: true,
+        hasColor: false,
+        sizeLabel: "Volume (ml)",
+        colorLabel: "Color"
+      };
+    }
+
+    // Belts
+    if (slug.includes("belt") || name.includes("belt")) {
+      return {
+        sizes: ["40", "44", "48"],
+        colors: ["Black", "Brown", "Tan", "Grey", "White", "Navy"],
+        hasSize: true,
+        hasColor: true,
+        sizeLabel: "Size (Inches)",
+        colorLabel: "Color"
+      };
+    }
+
+    // Shoes & Footwear
+    const isFootwear = 
+      slug.includes("shoe") || slug.includes("footwear") || slug.includes("sandal") || slug.includes("canvas") ||
+      name.includes("shoe") || name.includes("footwear") || name.includes("sandal") || name.includes("canvas");
+    
+    if (isFootwear) {
+      if (group === "SCHOOL") {
+        return {
+          sizes: ["3", "4", "5"],
+          colors: ["Black", "White", "Brown"],
+          hasSize: true,
+          hasColor: true,
+          sizeLabel: "Size (UK/Apex)",
+          colorLabel: "Color"
+        };
+      }
+      return {
+        sizes: ["39", "40", "41", "42", "43", "44"],
+        colors: ["Black", "White", "Brown", "Tan", "Grey", "Navy", "Blue", "Red", "Green", "Multicolor"],
+        hasSize: true,
+        hasColor: true,
+        sizeLabel: "Size (BD/EU)",
+        colorLabel: "Color"
+      };
+    }
+
+    // Pants/Jeans
+    const isPants = 
+      slug.includes("pant") || slug.includes("denim") || slug.includes("jeans") ||
+      name.includes("pant") || name.includes("denim") || name.includes("jeans");
+    
+    if (isPants) {
+      return {
+        sizes: ["28", "30", "32", "34", "36", "38"],
+        colors: ["Black", "Blue", "Grey", "Navy", "Brown", "White", "Khaki", "Beige"],
+        hasSize: true,
+        hasColor: true,
+        sizeLabel: "Size (Waist)",
+        colorLabel: "Color"
+      };
+    }
+
+    // Shirt, T-Shirt, Polo, Panjabi, Clothing
+    const isClothingTops = 
+      slug.includes("shirt") || slug.includes("panjabi") || slug.includes("t-shirt") || slug.includes("polo") || slug.includes("clothing") ||
+      name.includes("shirt") || name.includes("t-shirt") || name.includes("panjabi") || name.includes("polo") || name.includes("clothing");
+    
+    if (isClothingTops) {
+      return {
+        sizes: ["S", "M", "L", "XL", "XXL", "2XL"],
+        colors: [
+          "Black", "White", "Navy", "Blue", "Red", "Green", "Grey", 
+          "Yellow", "Pink", "Purple", "Orange", "Maroon", "Olive", 
+          "Beige", "Cream", "Mustard", "Multicolor"
+        ],
+        hasSize: true,
+        hasColor: true,
+        sizeLabel: "Size",
+        colorLabel: "Color"
+      };
+    }
+
+    return defaultRes;
+  };
+
   const handleOpenAddModal = () => {
     setEditingProduct(null);
     setTitle("");
@@ -59,7 +202,8 @@ export default function AdminProductsPage() {
     setDiscount("0");
     setCategoryId("");
     setTargetGroup("UNISEX");
-    setImagesFiles(null);
+    setExistingImages([]);
+    setImagesFiles([]);
     setVariants([{ size: "", color: "", sku: "", stock: 10 }]);
     setIsModalOpen(true);
   };
@@ -73,14 +217,16 @@ export default function AdminProductsPage() {
     setDiscount(product.discount.toString());
     setCategoryId(product.categoryId);
     setTargetGroup(product.targetGroup);
-    setImagesFiles(null);
+    setExistingImages(product.images || []);
+    setImagesFiles([]);
+    
     setVariants(
       product.variants.map((v: any) => ({
-        size: v.size,
-        color: v.color,
+        size: v.size || "",
+        color: v.color || "",
         sku: v.sku,
         stock: v.stock,
-        price: v.price || undefined
+        price: v.price || undefined,
       }))
     );
     setIsModalOpen(true);
@@ -95,16 +241,63 @@ export default function AdminProductsPage() {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
+  const handleToggleSize = (index: number, sizeVal: string) => {
+    const updated = [...variants];
+    const currentSizes = updated[index].size 
+      ? updated[index].size.split(",").map((s: string) => s.trim()).filter(Boolean)
+      : [];
+    
+    let nextSizes;
+    if (currentSizes.includes(sizeVal)) {
+      nextSizes = currentSizes.filter((s: string) => s !== sizeVal);
+    } else {
+      nextSizes = [...currentSizes, sizeVal];
+    }
+    updated[index].size = nextSizes.join(", ");
+    setVariants(updated);
+  };
+
+  const handleToggleColor = (index: number, colorVal: string) => {
+    const updated = [...variants];
+    const currentColors = updated[index].color 
+      ? updated[index].color.split(",").map((c: string) => c.trim()).filter(Boolean)
+      : [];
+    
+    let nextColors;
+    if (currentColors.includes(colorVal)) {
+      nextColors = currentColors.filter((c: string) => c !== colorVal);
+    } else {
+      nextColors = [...currentColors, colorVal];
+    }
+    updated[index].color = nextColors.join(", ");
+    setVariants(updated);
+  };
+
   const handleVariantChange = (index: number, field: keyof VariantInput, value: any) => {
     const updated = [...variants];
     if (field === "stock") {
-      updated[index][field] = parseInt(value) || 0;
+      (updated[index] as any)[field] = parseInt(value) || 0;
     } else if (field === "price") {
-      updated[index][field] = value ? parseFloat(value) : undefined;
+      (updated[index] as any)[field] = value ? parseFloat(value) : undefined;
     } else {
-      updated[index][field] = value;
+      (updated[index] as any)[field] = value;
     }
     setVariants(updated);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selected = Array.from(e.target.files);
+      setImagesFiles((prev) => [...prev, ...selected]);
+    }
+  };
+
+  const handleRemoveExistingImage = (index: number) => {
+    setExistingImages(existingImages.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveNewUpload = (index: number) => {
+    setImagesFiles(imagesFiles.filter((_, i) => i !== index));
   };
 
   const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
@@ -133,6 +326,15 @@ export default function AdminProductsPage() {
       return;
     }
 
+    const opts = getDynamicOptions(categoryId, targetGroup);
+    const cleanedVariants = variants.map(v => ({
+      sku: v.sku,
+      stock: v.stock,
+      price: v.price,
+      size: opts.hasSize ? v.size : "",
+      color: opts.hasColor ? v.color : "",
+    }));
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
@@ -141,13 +343,23 @@ export default function AdminProductsPage() {
     formData.append("discount", discount);
     formData.append("categoryId", categoryId);
     formData.append("targetGroup", targetGroup);
-    formData.append("variants", JSON.stringify(variants));
+    formData.append("variants", JSON.stringify(cleanedVariants));
 
-    if (imagesFiles) {
-      for (let i = 0; i < imagesFiles.length; i++) {
-        formData.append("files", imagesFiles[i]);
+    // Append remaining existing images if editing
+    if (editingProduct) {
+      if (existingImages.length === 0) {
+        formData.append("images", "");
+      } else {
+        existingImages.forEach(img => {
+          formData.append("images", img);
+        });
       }
     }
+
+    // Append newly selected uploads
+    imagesFiles.forEach((file) => {
+      formData.append("files", file);
+    });
 
     try {
       if (editingProduct) {
@@ -483,16 +695,65 @@ export default function AdminProductsPage() {
                   </select>
                 </div>
 
-                {/* Image Uploads */}
-                <div>
-                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1.5">Images (Upload files)</label>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => setImagesFiles(e.target.files)}
-                    className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-black hover:file:bg-gray-200 cursor-pointer"
-                  />
+                {/* Images Section */}
+                <div className="md:col-span-2 space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-gray-700 mb-1.5">Product Images</label>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-black hover:file:bg-gray-200 cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Previews of Existing Images (if editing) */}
+                  {existingImages.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-gray-500 uppercase">Existing Images ({existingImages.length})</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                        {existingImages.map((img, idx) => (
+                          <div key={idx} className="relative aspect-square border rounded-lg overflow-hidden bg-gray-50 group">
+                            <img src={img} alt="Product view" className="h-full w-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveExistingImage(idx)}
+                              className="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition shadow cursor-pointer opacity-90 group-hover:opacity-100"
+                              title="Remove image"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Previews of Newly Selected Uploads */}
+                  {imagesFiles.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-gray-500 uppercase">New Uploads ({imagesFiles.length})</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                        {imagesFiles.map((file, idx) => {
+                          const url = URL.createObjectURL(file);
+                          return (
+                            <div key={idx} className="relative aspect-square border rounded-lg overflow-hidden bg-gray-50 group">
+                              <img src={url} alt="Selected upload" className="h-full w-full object-cover" />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveNewUpload(idx)}
+                                className="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition shadow cursor-pointer opacity-90 group-hover:opacity-100"
+                                title="Remove image"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
               </div>
@@ -523,78 +784,144 @@ export default function AdminProductsPage() {
                   </button>
                 </div>
 
-                <div className="space-y-3">
-                  {variants.map((v, idx) => (
-                    <div key={idx} className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end bg-gray-50/50 border p-3 rounded-lg relative">
-                      
-                      {/* Size/Volume ml dynamic label */}
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">
-                          {formConfig.sizeLabel}
-                        </label>
-                        <input
-                          type="text"
-                          value={v.size || ""}
-                          placeholder={formConfig.sizePlaceholder}
-                          onChange={(e) => handleVariantChange(idx, "size", e.target.value)}
-                          className="w-full bg-white border rounded py-1 px-2.5 text-xs focus:outline-none"
-                        />
-                      </div>
+                <div className="space-y-4">
+                  {(() => {
+                    const dynamicOpts = getDynamicOptions(categoryId, targetGroup);
+                    return variants.map((v, idx) => {
+                      return (
+                        <div key={idx} className="bg-gray-50 border border-gray-200 p-5 rounded-xl relative space-y-4 shadow-sm">
+                          {/* Remove Button in corner */}
+                          {variants.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveVariantRow(idx)}
+                              className="absolute top-3 right-3 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition cursor-pointer"
+                              title="Remove Variant"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          )}
 
-                      {/* Color */}
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Color (optional)</label>
-                        <input
-                          type="text"
-                          value={v.color || ""}
-                          placeholder="e.g. Black"
-                          onChange={(e) => handleVariantChange(idx, "color", e.target.value)}
-                          className="w-full bg-white border rounded py-1 px-2.5 text-xs focus:outline-none"
-                        />
-                      </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Size selection */}
+                            {dynamicOpts.hasSize ? (
+                              <div className="space-y-2">
+                                <label className="block text-xs font-bold uppercase text-gray-700">
+                                  {dynamicOpts.sizeLabel} * (Select multiple)
+                                </label>
+                                <div className="flex flex-wrap gap-1.5 p-1 bg-white border rounded-lg min-h-[40px] items-center">
+                                  {dynamicOpts.sizes.map((s) => {
+                                    const isSelected = v.size 
+                                      ? v.size.split(",").map(x => x.trim()).includes(s) 
+                                      : false;
+                                    return (
+                                      <button
+                                        type="button"
+                                        key={s}
+                                        onClick={() => handleToggleSize(idx, s)}
+                                        className={`px-2.5 py-1 text-xs border rounded-md font-semibold transition cursor-pointer ${
+                                          isSelected
+                                            ? "bg-black text-white border-black"
+                                            : "bg-gray-50 text-gray-700 border-gray-200 hover:border-black"
+                                        }`}
+                                      >
+                                        {s}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                                <input
+                                  type="text"
+                                  value={v.size || ""}
+                                  placeholder="Or type custom size(s) separated by commas"
+                                  onChange={(e) => handleVariantChange(idx, "size", e.target.value)}
+                                  className="w-full bg-white border rounded-lg py-2 px-3 text-xs focus:outline-none focus:border-black"
+                                />
+                              </div>
+                            ) : (
+                              <div>
+                                <label className="block text-xs font-bold uppercase text-gray-400 mb-1.5">Size</label>
+                                <div className="text-gray-400 text-xs py-2 px-3 bg-gray-100 rounded-lg border">Not applicable for watches</div>
+                              </div>
+                            )}
 
-                      {/* SKU */}
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">SKU *</label>
-                        <input
-                          type="text"
-                          required
-                          value={v.sku}
-                          placeholder="e.g. AM90-BLK-10"
-                          onChange={(e) => handleVariantChange(idx, "sku", e.target.value)}
-                          className="w-full bg-white border rounded py-1 px-2.5 text-xs focus:outline-none"
-                        />
-                      </div>
+                            {/* Color selection */}
+                            {dynamicOpts.hasColor ? (
+                              <div className="space-y-2">
+                                <label className="block text-xs font-bold uppercase text-gray-700">
+                                  {dynamicOpts.colorLabel} (optional, select multiple)
+                                </label>
+                                <div className="flex flex-wrap gap-1.5 p-1 bg-white border rounded-lg min-h-[40px] items-center">
+                                  {dynamicOpts.colors.map((c) => {
+                                    const isSelected = v.color 
+                                      ? v.color.split(",").map(x => x.trim()).includes(c) 
+                                      : false;
+                                    return (
+                                      <button
+                                        type="button"
+                                        key={c}
+                                        onClick={() => handleToggleColor(idx, c)}
+                                        className={`px-2.5 py-1 text-xs border rounded-md font-semibold transition cursor-pointer ${
+                                          isSelected
+                                            ? "bg-black text-white border-black"
+                                            : "bg-gray-50 text-gray-700 border-gray-200 hover:border-black"
+                                        }`}
+                                      >
+                                        {c}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                                <input
+                                  type="text"
+                                  value={v.color || ""}
+                                  placeholder="Or type custom color(s) separated by commas"
+                                  onChange={(e) => handleVariantChange(idx, "color", e.target.value)}
+                                  className="w-full bg-white border rounded-lg py-2 px-3 text-xs focus:outline-none focus:border-black"
+                                />
+                              </div>
+                            ) : (
+                              <div>
+                                <label className="block text-xs font-bold uppercase text-gray-400 mb-1.5">Color</label>
+                                <div className="text-gray-400 text-xs py-2 px-3 bg-gray-100 rounded-lg border">Not applicable for perfumes</div>
+                              </div>
+                            )}
+                          </div>
 
-                      {/* Stock */}
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Stock *</label>
-                        <input
-                          type="number"
-                          required
-                          min="0"
-                          value={v.stock}
-                          onChange={(e) => handleVariantChange(idx, "stock", e.target.value)}
-                          className="w-full bg-white border rounded py-1 px-2.5 text-xs focus:outline-none"
-                        />
-                      </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                            {/* SKU */}
+                            <div>
+                              <label className="block text-xs font-bold uppercase text-gray-700 mb-1.5">SKU *</label>
+                              <input
+                                type="text"
+                                required
+                                value={v.sku}
+                                placeholder="e.g. AM90-BLK-10"
+                                onChange={(e) => handleVariantChange(idx, "sku", e.target.value)}
+                                className="w-full bg-white border rounded-lg py-2 px-3 text-xs focus:outline-none focus:border-black"
+                              />
+                            </div>
 
-                      {/* Remove action */}
-                      <div className="flex justify-end col-span-2 md:col-span-1">
-                        <button
-                          type="button"
-                          disabled={variants.length === 1}
-                          onClick={() => handleRemoveVariantRow(idx)}
-                          className="w-full text-center border border-red-200 text-red-500 hover:bg-red-50 transition text-xs py-1.5 rounded cursor-pointer disabled:opacity-50"
-                        >
-                          Remove
-                        </button>
-                      </div>
+                            {/* Stock */}
+                            <div>
+                              <label className="block text-xs font-bold uppercase text-gray-700 mb-1.5">Stock *</label>
+                              <input
+                                type="number"
+                                required
+                                min="0"
+                                value={v.stock}
+                                onChange={(e) => handleVariantChange(idx, "stock", e.target.value)}
+                                className="w-full bg-white border rounded-lg py-2 px-3 text-xs focus:outline-none focus:border-black"
+                              />
+                            </div>
+                          </div>
 
-                    </div>
-                  ))}
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
-              </div>
+          </div>
 
               {/* Submit actions */}
               <div className="flex justify-end gap-3 border-t pt-4 mt-6">

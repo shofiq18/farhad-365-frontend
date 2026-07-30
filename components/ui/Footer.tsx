@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 export default function Footer() {
+  const { user } = useSelector((state: RootState) => state.user);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     products: false,
     support: false,
@@ -23,19 +26,21 @@ export default function Footer() {
     <footer className="bg-black text-white font-sans antialiased select-none border-t border-zinc-900">
       
       {/* ── ADIDAS STYLE TOP NEWSLETTER / ADICLUB BAR ── */}
-      <div className="bg-[#507c68] text-white py-5">
-        <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 flex flex-col md:flex-row items-center justify-between gap-4">
-          <h3 className="text-lg md:text-xl font-black uppercase tracking-wider" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
-            JOIN OUR <span className="font-light">365</span>CLUB & GET 15% OFF
-          </h3>
-          <Link
-            href="/sign-up"
-            className="inline-flex items-center gap-3 bg-white hover:bg-zinc-100 text-black font-black text-xs py-3.5 px-6 rounded-none border border-white uppercase tracking-wider group transition duration-300"
-          >
-            Sign Up For Free <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>
-          </Link>
+      {!user && (
+        <div className="bg-[#507c68] text-white py-5">
+          <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 flex flex-col md:flex-row items-center justify-between gap-4">
+            <h3 className="text-lg md:text-xl font-black uppercase tracking-wider" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+              JOIN OUR <span className="font-light">365</span>CLUB & GET 15% OFF
+            </h3>
+            <Link
+              href="/sign-up"
+              className="inline-flex items-center gap-3 bg-white hover:bg-zinc-100 text-black font-black text-xs py-3.5 px-6 rounded-none border border-white uppercase tracking-wider group transition duration-300"
+            >
+              Sign Up For Free <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── MAIN FOOTER CONTENT ── */}
       <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 py-16">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { logout } from "@/feature/user/userSlice";
@@ -40,6 +40,29 @@ export default function Navbar() {
   const desktopSearchRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
+
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY <= 80) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY.current) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const { user } = useSelector((state: RootState) => state.user);
   const { items } = useSelector((state: RootState) => state.cart);
@@ -205,6 +228,9 @@ export default function Navbar() {
                           return groups.includes("OTHERS") || groups.includes("UNISEX");
                         }
                         if (targetGroup) {
+                          if (targetGroup === "SCHOOL") {
+                            return groups.includes("SCHOOL");
+                          }
                           return groups.includes(targetGroup) || groups.includes("UNISEX");
                         }
                         return true;
@@ -230,15 +256,13 @@ export default function Navbar() {
   };
 
   return (
-    <div className="relative z-50">
+    <div className={`sticky top-0 w-full transition-transform duration-300 z-50 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
 
       {/* ── Top Bar ── */}
       <div className="hidden sm:block border-b border-gray-200 bg-[#f5f5f5] py-1.5 text-[11px] font-bold text-[#111111]">
         <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 flex justify-between items-center">
           <div className="flex items-center space-x-3.5">
-            {/* <svg className="h-5 w-5 fill-current text-black hover:opacity-70 transition cursor-pointer" viewBox="0 0 24 24">
-              <path d="M12 2L2 22h20L12 2zm0 3.99L19.53 19H4.47L12 5.99z" />
-            </svg> */}
+            {/* Left side spacer */}
           </div>
           <div className="flex items-center space-x-3.5">
             <Link href="/blog" className="hover:text-gray-500">Blog</Link>
@@ -255,7 +279,7 @@ export default function Navbar() {
               <div className="flex items-center space-x-3.5">
                 <Link href="/sign-up" className="hover:text-gray-500">Join Us</Link>
                 <span className="h-3.5 w-[1px] bg-gray-300" />
-                <Link href="/login" className="hover:text-gray-500">Sign In</Link>
+                <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="hover:text-gray-500">Sign In</Link>
               </div>
             )}
           </div>
@@ -263,23 +287,18 @@ export default function Navbar() {
       </div>
 
       {/* ── Main Nav ── */}
-      <nav className="sticky top-0 w-full border-b border-gray-200 bg-white">
+      <nav className="w-full border-b border-gray-200 bg-white relative">
         <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16">
           <div className="flex h-16 justify-between items-center">
 
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center group">
-                <svg className="h-10 w-16 text-[#111111] group-hover:scale-105 transition-transform duration-200" viewBox="0 0 115 90" xmlns="http://www.w3.org/2000/svg">
-                  {/* Stripe 1 */}
-                  <path d="M10,75 C16,73 26,65 36,50 C44,40 32,32 45,22 C55,14 75,10 95,5 C80,10 65,18 55,28 C45,38 55,45 45,55 C35,65 22,72 10,75 Z" fill="currentColor" />
-                  {/* Stripe 2 */}
-                  <path d="M15,78 C21,76 31,68 41,53 C49,43 37,35 50,25 C60,17 80,13 100,8 C85,13 70,21 60,31 C50,41 60,48 50,58 C40,68 27,75 15,78 Z" fill="currentColor" />
-                  {/* Stripe 3 */}
-                  <path d="M20,81 C26,79 36,71 46,56 C54,46 42,38 55,28 C65,20 85,16 105,11 C90,16 75,24 65,34 C55,44 65,51 55,61 C45,71 32,78 20,81 Z" fill="currentColor" />
-                  {/* Stripe 4 */}
-                  <path d="M25,84 C31,82 41,74 51,59 C59,49 47,41 60,31 C70,23 90,19 110,14 C95,19 80,27 70,37 C60,47 70,54 60,64 C50,74 37,81 25,84 Z" fill="currentColor" />
-                </svg>
+                <img 
+                  src="/main-logo.jpg" 
+                  alt="Farhad365 Logo" 
+                  className="h-14 w-auto object-contain transition duration-200 group-hover:scale-105 select-none invert" 
+                />
               </Link>
             </div>
 
