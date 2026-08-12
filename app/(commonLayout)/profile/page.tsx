@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { logout } from "@/feature/user/userSlice";
 import { toggleWishlistDrawer } from "@/redux/wishlistSlice";
-import { useGetMyOrdersQuery, useGetOrderByIdQuery } from "@/redux/api/order/orderApi";
+import { useGetMyOrdersQuery, useGetOrderByIdQuery, useReInitiatePaymentMutation } from "@/redux/api/order/orderApi";
 import { useCreateReviewMutation } from "@/redux/api/product/productApi";
 import {
   User as UserIcon,
@@ -25,6 +25,8 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
+
+import Cookies from "js-cookie";
 
 type Tab = "profile" | "address" | "orders" | "tracker";
 
@@ -58,12 +60,13 @@ function ProfileForm() {
   }, [searchParams]);
 
   // Redirect to login if user is not authenticated
-  // useEffect(() => {
-  //   if (!user) {
-  //     toast.error("Please sign in to view your profile.");
-  //     router.push("/login?redirect=/profile");
-  //   }
-  // }, [user, router]);
+  useEffect(() => {
+    const token = Cookies.get("accessToken");
+    if (!token && !user) {
+      toast.error("Please sign in to view your profile.");
+      router.push(`/login?redirect=/profile?tab=${activeTab}`);
+    }
+  }, [user, router, activeTab]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -85,7 +88,7 @@ function ProfileForm() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
           <p className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400 mb-2">My Account Portal</p>
           <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white leading-tight">
-            Welcome, {user.name}
+            Welcome, {user.name || (user.email ? user.email.split("@")[0] : "User")}
           </h1>
           <p className="text-base md:text-lg text-zinc-400 mt-2.5 font-medium">{user.email}</p>
         </div>
@@ -261,7 +264,7 @@ function MyProfileSection({ user }: { user: any }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8 border-t border-zinc-200 pt-8">
         <div>
           <p className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">Full Name</p>
-          <p className="text-base md:text-lg font-bold text-black mt-2">{user.name}</p>
+          <p className="text-base md:text-lg font-bold text-black mt-2">{user.name || "Not Specified"}</p>
         </div>
         <div>
           <p className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">Email Address</p>
@@ -427,6 +430,25 @@ function MyOrdersSection() {
   const { data: ordersResponse, isLoading } = useGetMyOrdersQuery();
   const orders = ordersResponse?.data || [];
 
+  const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
+  const [reInitiatePayment] = useReInitiatePaymentMutation();
+
+  const handlePayAgain = async (orderId: string) => {
+    setPayingOrderId(orderId);
+    try {
+      const response = await reInitiatePayment({ id: orderId, paymentGateway: "BKASH" }).unwrap();
+      if (response.status === "success" && response.paymentUrl) {
+        window.location.href = response.paymentUrl;
+      } else {
+        toast.error("Failed to initiate payment. Please try again.");
+        setPayingOrderId(null);
+      }
+    } catch (err: any) {
+      toast.error(err?.data?.message || "An error occurred. Please try again.");
+      setPayingOrderId(null);
+    }
+  };
+
   const [createReview, { isLoading: submittingReview }] = useCreateReviewMutation();
   const [reviewModal, setReviewModal] = useState<{
     open: boolean;
@@ -545,6 +567,18 @@ function MyOrdersSection() {
                     </span>
                   </div>
                 </div>
+                {order.paymentMethod === "DIGITAL" && (order.status === "CANCELLED" || order.status === "PENDING") && (
+                  <div className="flex justify-end pt-4 border-t border-zinc-200 mt-4">
+                    <button
+                      onClick={() => handlePayAgain(order.id || order._id)}
+                      disabled={payingOrderId !== null}
+                      className="bg-black hover:bg-zinc-800 disabled:bg-zinc-400 text-white font-bold py-2.5 px-6 text-xs uppercase tracking-wider rounded-full transition cursor-pointer flex items-center gap-2"
+                    >
+                      {payingOrderId === (order.id || order._id) && <Loader className="animate-spin h-3.5 w-3.5" />}
+                      Pay Again (bKash)
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -5,9 +5,12 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { useGetAllSettingsQuery } from "@/redux/api/setting/settingApi";
 
 export default function Footer() {
   const { user } = useSelector((state: RootState) => state.user);
+  const { data: settingsResponse } = useGetAllSettingsQuery();
+  const settings = settingsResponse?.data?.map || {};
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     products: false,
     support: false,
@@ -30,7 +33,7 @@ export default function Footer() {
         <div className="bg-[#507c68] text-white py-5">
           <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 flex flex-col md:flex-row items-center justify-between gap-4">
             <h3 className="text-lg md:text-xl font-black uppercase tracking-wider" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
-              JOIN OUR <span className="font-light">365</span>CLUB & GET 15% OFF
+              JOIN OUR <span className="font-light">PRISTTO</span> CLUB & GET 15% OFF
             </h3>
             <Link
               href="/sign-up"
@@ -45,11 +48,45 @@ export default function Footer() {
       {/* ── MAIN FOOTER CONTENT ── */}
       <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 py-16">
         
-        {/* Main Grid: 6 columns on desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-6 pb-12">
+        {/* Main Grid: 12 columns on desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6 pb-12">
           
-          {/* Column 1: PRODUCTS */}
-          <div className="border-b border-zinc-800 md:border-b-0 pb-4 md:pb-0">
+          {/* Column 1: BRAND DETAILS (4 cols) */}
+          <div className="md:col-span-4 space-y-5">
+            <Link href="/" className="inline-block">
+              <img 
+                src="/main-logo.jpg" 
+                alt="Pristto Logo" 
+                className="h-10 w-auto object-contain hover:scale-105 transition-transform duration-200 select-none invert" 
+              />
+            </Link>
+            <p className="text-[13px] text-zinc-300 font-medium leading-relaxed max-w-sm">
+              {settings.footer_about || "Pristto is your go-to destination for premium fashion."}
+            </p>
+            <div className="space-y-2 text-[13px] text-zinc-300 font-medium pt-2 border-t border-zinc-900">
+              {settings.support_phone && (
+                <p className="flex items-center gap-2">
+                  <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-wider">Phone:</span>
+                  <span className="select-text">{settings.support_phone}</span>
+                </p>
+              )}
+              {settings.support_email && (
+                <p className="flex items-center gap-2">
+                  <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-wider">Email:</span>
+                  <span className="select-text">{settings.support_email}</span>
+                </p>
+              )}
+              {settings.support_address && (
+                <p className="flex items-start gap-2">
+                  <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-wider mt-0.5">Address:</span>
+                  <span className="select-text">{settings.support_address}</span>
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Column 2: PRODUCTS (2 cols) */}
+          <div className="md:col-span-2 border-b border-zinc-800 md:border-b-0 pb-4 md:pb-0">
             <h3 className="hidden md:block text-[14px] font-bold text-white uppercase tracking-wider mb-5">
               PRODUCTS
             </h3>
@@ -74,8 +111,8 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 5: SUPPORT */}
-          <div className="border-b border-zinc-800 md:border-b-0 pb-4 md:pb-0">
+          {/* Column 3: SUPPORT (2 cols) */}
+          <div className="md:col-span-2 border-b border-zinc-800 md:border-b-0 pb-4 md:pb-0">
             <h3 className="hidden md:block text-[14px] font-bold text-white uppercase tracking-wider mb-5">
               SUPPORT
             </h3>
@@ -91,14 +128,14 @@ export default function Footer() {
               <li><Link href="/help" className="hover:text-white hover:underline transition duration-200">Help</Link></li>
               <li><Link href="/returns" className="hover:text-white hover:underline transition duration-200">Returns & Exchanges</Link></li>
               <li><Link href="/shipping" className="hover:text-white hover:underline transition duration-200">Shipping</Link></li>
-              <li><Link href="/track-order" className="hover:text-white hover:underline transition duration-200">Order Tracker</Link></li>
+              <li><Link href="/profile?tab=tracker" className="hover:text-white hover:underline transition duration-200">Order Tracker</Link></li>
               <li><Link href="/store-locator" className="hover:text-white hover:underline transition duration-200">Store Locator</Link></li>
               <li><Link href="/size-charts" className="hover:text-white hover:underline transition duration-200">Size Charts</Link></li>
             </ul>
           </div>
 
-          {/* Column 6: COMPANY INFO */}
-          <div className="border-b border-zinc-800 md:border-b-0 pb-4 md:pb-0">
+          {/* Column 4: COMPANY INFO (2 cols) */}
+          <div className="md:col-span-2 border-b border-zinc-800 md:border-b-0 pb-4 md:pb-0">
             <h3 className="hidden md:block text-[14px] font-bold text-white uppercase tracking-wider mb-5">
               COMPANY INFO
             </h3>
@@ -112,16 +149,15 @@ export default function Footer() {
             
             <ul className={`${openSections.company ? "block" : "hidden"} md:block space-y-3 mt-2 md:mt-0 text-[13px] text-zinc-100 font-medium`}>
               <li><Link href="/about" className="hover:text-white hover:underline transition duration-200">About Us</Link></li>
-              <li><Link href="/student-discount" className="hover:text-white hover:underline transition duration-200">Student Discount</Link></li>
-              <li><Link href="/healthcare-discount" className="hover:text-white hover:underline transition duration-200">Military & Healthcare Discount</Link></li>
-              <li><Link href="/stories" className="hover:text-white hover:underline transition duration-200">Farhad365 Stories</Link></li>
+              <li><Link href="/stories" className="hover:text-white hover:underline transition duration-200">Pristto Stories</Link></li>
               <li><Link href="/blog" className="hover:text-white hover:underline transition duration-200">Blog</Link></li>
               <li><Link href="/careers" className="hover:text-white hover:underline transition duration-200">Careers</Link></li>
+              <li><Link href="/quotation" className="hover:text-white hover:underline transition duration-200 font-semibold text-[#9eff00]">Bulk / Wholesale Order</Link></li>
             </ul>
           </div>
 
-          {/* Column 5: FOLLOW US */}
-          <div className="border-b border-zinc-800 md:border-b-0 pb-4 md:pb-0">
+          {/* Column 5: FOLLOW US (2 cols) */}
+          <div className="border-b border-zinc-800 md:border-b-0 pb-4 md:pb-0 md:col-span-2">
             <h3 className="hidden md:block text-[14px] font-bold text-white uppercase tracking-wider mb-5">
               FOLLOW US
             </h3>
@@ -141,14 +177,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 6: BANGLADESH */}
-          <div className="pb-4 md:pb-0 flex md:justify-end">
-            <div className="flex item-end gap-2 text-[13px] font-semibold text-zinc-100 hover:text-white transition duration-200 cursor-pointer">
-              <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span>Bangladesh</span>
-            </div>
-          </div>
-
         </div>
 
         {/* Bottom Bar: localization + privacy links + copyright */}
@@ -156,6 +184,11 @@ export default function Footer() {
           
           {/* Line 1: Location + Privacy Choices Toggle + Other Links */}
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            <div className="flex items-center gap-1.5 font-bold hover:text-white transition duration-200 cursor-pointer">
+              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+              <span>Bangladesh</span>
+            </div>
+            <span className="text-zinc-500 text-xl hidden sm:inline">|</span>
             <Link href="/privacy-choices" className="hover:text-white transition duration-200 inline-flex items-center gap-1.5 font-bold">
               <span>Your Privacy Choices</span>
               <svg className="h-3.5 w-6 align-middle" viewBox="0 0 30 14" fill="none">
@@ -172,7 +205,7 @@ export default function Footer() {
 
           {/* Line 2: Copyright */}
           <div className="text-zinc-200 mt-5 font-semibold text-[12px]">
-            &copy; {new Date().getFullYear()} Farhad365, Inc. All Rights Reserved
+            &copy; {new Date().getFullYear()} Pristto, Inc. All Rights Reserved
           </div>
 
         </div>

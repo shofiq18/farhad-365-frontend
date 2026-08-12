@@ -3,8 +3,8 @@ import "./globals.css";
 import ReduxProvider from "@/redux/ReduxProvider";
 
 export const metadata: Metadata = {
-  title: "FARHAD365 - Premium E-Commerce Store",
-  description: "Explore curated clothing, footwear, accessories and brands at FARHAD365.",
+  title: "Pristto",
+  description: "Explore curated clothing, footwear, accessories and brands at Pristto.",
 };
 
 export default function RootLayout({

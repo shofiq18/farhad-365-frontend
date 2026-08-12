@@ -19,7 +19,7 @@ export function DashboardHeader() {
           {/* Left side - Can add breadcrumbs or title here */}
           <div className="flex-1">
             <h1 className="text-xl sm:text-xl ml-8 font-bold text-gray-900">
-             {user?.data?.name || "Dashboard"}
+             Welcome  {user?.data?.name || "Dashboard"}
             </h1>
           </div>
 
@@ -47,7 +47,7 @@ export function DashboardHeader() {
             {/* Avatar */}
             <Avatar className="h-9 w-9 sm:h-10 sm:w-10 ring-2 ring-[#314B79] ring-offset-2 transition-transform hover:scale-105">
               <AvatarImage
-                src={user?.data?.profilePicture || ""}
+                src={user?.data?.profileImage || ""}
                 alt={user?.data?.name || "Admin"}
                 className="object-cover"
               />

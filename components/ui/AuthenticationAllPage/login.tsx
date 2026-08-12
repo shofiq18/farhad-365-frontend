@@ -48,21 +48,22 @@ export default function LoginForm() {
     try {
       const response = await signIn({ email, password }).unwrap();
 
-      // Support response.token (backend) or response.data.accessToken or response.data.result.accessToken
-      const accessToken = response?.token || response?.data?.accessToken || response?.data?.result?.accessToken;
+      // accessToken is at the top level of the response
+      const accessToken = response?.accessToken || response?.token || response?.data?.accessToken;
 
       if (!accessToken) {
         throw new Error("No access token received from server");
       }
 
-      // Read user details from backend response first, or fallback to decoding token
+      // User fields are directly under response.data
       let userFromToken: UserProfile = {
-        id: response?.data?.user?.id || "",
-        email: response?.data?.user?.email || email,
-        name: response?.data?.user?.name || email.split("@")[0],
-        role: response?.data?.user?.role || undefined,
+        id: response?.data?.id || "",
+        email: response?.data?.email || email,
+        name: response?.data?.name || email.split("@")[0],
+        role: response?.data?.role || undefined,
       };
 
+      // Fallback: decode JWT if user data missing
       if (!userFromToken.id) {
         try {
           const payload = JSON.parse(atob(accessToken.split(".")[1]));
@@ -88,7 +89,10 @@ export default function LoginForm() {
       // console.log("Logged in user:", userFromToken);
 
       const redirectUrl = searchParams.get("redirect") || searchParams.get("callbackUrl");
-      if (userFromToken?.role === "ADMIN" || userFromToken?.role === "SUPERADMIN" || userFromToken?.role === "SUPER_ADMIN") {
+      const role = userFromToken?.role?.toUpperCase();
+      const isAdminOrManager = role === "ADMIN" || role === "SUPERADMIN" || role === "SUPER_ADMIN" || role === "MANAGER";
+
+      if (isAdminOrManager) {
         router.push("/dashboard");
       } else if (redirectUrl) {
         router.push(redirectUrl);

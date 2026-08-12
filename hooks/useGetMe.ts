@@ -33,6 +33,8 @@ export const useGetMe = () => {
                             name: meData.data.name,
                             email: meData.data.email,
                             role: meData.data.role,
+                            phone: meData.data.phone,
+                            profileImage: meData.data.profileImage,
                         },
                         accessToken: token,
                     }),

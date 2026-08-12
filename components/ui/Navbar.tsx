@@ -272,7 +272,7 @@ export default function Navbar() {
             <span className="h-3.5 w-[1px] bg-gray-300" />
             {user ? (
               <div className="flex items-center space-x-1">
-                <span>Hi, {user.name.split(" ")[0]}</span>
+                <span>Hi, {user.name ? user.name.split(" ")[0] : (user.email ? user.email.split("@")[0] : "User")}</span>
                 <span className="h-3.5 w-[1px] bg-gray-300 ml-1.5" />
                 <button onClick={handleLogout} className="hover:text-red-600 cursor-pointer">Sign Out</button>
               </div>
@@ -297,7 +297,7 @@ export default function Navbar() {
               <Link href="/" className="flex items-center group">
                 <img 
                   src="/main-logo.jpg" 
-                  alt="Farhad365 Logo" 
+                  alt="Pristto Logo" 
                   className="h-14 w-auto object-contain transition duration-200 group-hover:scale-105 select-none invert" 
                 />
               </Link>

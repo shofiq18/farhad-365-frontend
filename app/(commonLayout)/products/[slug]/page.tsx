@@ -10,6 +10,7 @@ import { RootState } from "@/redux/store";
 import { Loader, Heart, ChevronDown, ChevronUp, AlertCircle, ShoppingBag, CheckCircle, Star } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { useGetAllSettingsQuery } from "@/redux/api/setting/settingApi";
 
 export default function ProductDetailsPage() {
   const { slug } = useParams();
@@ -18,6 +19,8 @@ export default function ProductDetailsPage() {
 
   const { data: productResponse, isLoading, error } = useGetProductBySlugQuery(slug as string);
   const product = productResponse?.data;
+  const { data: settingsResponse } = useGetAllSettingsQuery();
+  const settings = settingsResponse?.data?.map || {};
 
   // Fetch related products from the same category
   const { data: relatedResponse } = useGetProductsQuery(
@@ -518,7 +521,7 @@ export default function ProductDetailsPage() {
                 {openAccordions.shipping && (
                   <div className="pb-5 text-xs text-gray-500 leading-relaxed space-y-2">
                     <p>
-                      Free standard shipping on orders over $150. Delivery takes 3–7 business days once processed.
+                      Free standard shipping on orders over ৳{(settings.free_shipping_threshold ? parseFloat(settings.free_shipping_threshold).toLocaleString() : "1,000")}. Delivery takes 3–7 business days once processed.
                     </p>
                     <p>
                       You can return your purchase for any reason within 30 days of delivery, completely free of charge. Some exclusions apply.

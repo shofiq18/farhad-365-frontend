@@ -146,6 +146,28 @@ const authApi = baseApi.injectEndpoints({
       providesTags: ["User"],
     }),
 
+    getAllUsers: builder.query<any, void>({
+      query: () => ({ url: "/users", method: "GET" }),
+      providesTags: ["User"],
+    }),
+
+    updateUserRole: builder.mutation<any, { id: string; role: string }>({
+      query: ({ id, role }) => ({
+        url: `/users/${id}/role`,
+        method: "PATCH",
+        body: { role },
+      }),
+      invalidatesTags: ["User"],
+    }),
+
+    deleteUser: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/users/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"],
+    }),
+
    
    
  
@@ -178,7 +200,7 @@ const authApi = baseApi.injectEndpoints({
       invalidatesTags: ["User"],
     }),
    
-    updateProfile: builder.mutation<IBaseResponse, FormData>({
+    updateProfile: builder.mutation<any, any>({
       query: (body) => ({
         url: "/users/update-profile",
         method: "PATCH",
@@ -207,4 +229,7 @@ export const {
   useVerifyOtpMutation,
   useGetAllResourceQuery,
   useUpdateProfileMutation,
+  useGetAllUsersQuery,
+  useUpdateUserRoleMutation,
+  useDeleteUserMutation,
 } = authApi;

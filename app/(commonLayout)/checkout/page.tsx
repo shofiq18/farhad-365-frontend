@@ -5,10 +5,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { clearCart } from "@/redux/cartSlice";
 import { useCreateOrderMutation } from "@/redux/api/order/orderApi";
+import { useValidateDiscountMutation } from "@/redux/api/discount/discountApi";
 import { Loader, CheckCircle, AlertCircle, ShoppingBag, Truck, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { useGetAllSettingsQuery } from "@/redux/api/setting/settingApi";
 
 export default function CheckoutPage() {
   return (
@@ -34,6 +36,9 @@ function CheckoutForm() {
   const reasonParam = searchParams.get("reason");
 
   const [createOrder, { isLoading: isPlacingOrder }] = useCreateOrderMutation();
+  const [validateDiscount, { isLoading: isVerifyingPromo }] = useValidateDiscountMutation();
+  const { data: settingsResponse } = useGetAllSettingsQuery();
+  const settings = settingsResponse?.data?.map || {};
 
   // Form State
   const [street, setStreet] = useState("");
@@ -44,6 +49,11 @@ function CheckoutForm() {
   const [phone, setPhone] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "DIGITAL">("COD");
   const [paymentGateway, setPaymentGateway] = useState<"SSLCOMMERZ" | "BKASH">("BKASH");
+
+  // Promo Code State
+  const [promoCodeInput, setPromoCodeInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [promoError, setPromoError] = useState("");
 
   // Load saved phone and address defaults from localStorage
   useEffect(() => {
@@ -66,6 +76,40 @@ function CheckoutForm() {
     }
   }, []);
 
+  // Clear cart if returning from a successful payment gateway transaction
+  useEffect(() => {
+    if (paymentStatus === "success" && orderIdParam && items.length > 0) {
+      dispatch(clearCart());
+    }
+  }, [paymentStatus, orderIdParam, items, dispatch]);
+
+  // Re-validate coupon if cart items change to ensure minSpend and eligibility constraints hold
+  useEffect(() => {
+    if (appliedCoupon && items.length > 0) {
+      const reValidate = async () => {
+        try {
+          const response = await validateDiscount({
+            code: appliedCoupon.code,
+            items: items.map((item) => ({
+              variantId: item.variantId,
+              quantity: item.quantity,
+            })),
+          }).unwrap();
+          if (response.status === "success" && response.data) {
+            setAppliedCoupon(response.data);
+          }
+        } catch (err) {
+          setAppliedCoupon(null);
+          setPromoError("Cart updated. Applied coupon is no longer valid.");
+          toast.error("Applied coupon is no longer valid.");
+        }
+      };
+      reValidate();
+    } else if (items.length === 0) {
+      setAppliedCoupon(null);
+    }
+  }, [items]);
+
   // Order Result State
   const [orderSuccess, setOrderSuccess] = useState<any | null>(null);
 
@@ -74,8 +118,43 @@ function CheckoutForm() {
 
   // Calculations
   const subtotal = items.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
-  const shippingFee = state.toLowerCase() === "dhaka" ? 80.0 : 120.0;
-  const total = subtotal + shippingFee;
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  
+  // Dynamic free shipping threshold
+  const threshold = settings.free_shipping_threshold ? parseFloat(settings.free_shipping_threshold) : 1000;
+  const isFreeShipping = subtotal >= threshold;
+  const shippingFee = isFreeShipping ? 0.0 : (state.toLowerCase() === "dhaka" ? 80.0 : 120.0);
+  const total = Math.max(0, subtotal - discountAmount) + shippingFee;
+
+  const handleApplyPromo = async () => {
+    if (!promoCodeInput.trim()) return;
+    setPromoError("");
+    try {
+      const response = await validateDiscount({
+        code: promoCodeInput.trim(),
+        items: items.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
+      }).unwrap();
+
+      if (response.status === "success" && response.data) {
+        setAppliedCoupon(response.data);
+        setPromoError("");
+        toast.success("Coupon code applied!");
+      }
+    } catch (err: any) {
+      setPromoError(err?.data?.message || "Failed to validate promo code.");
+      setAppliedCoupon(null);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedCoupon(null);
+    setPromoCodeInput("");
+    setPromoError("");
+    toast.success("Promo code removed.");
+  };
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,15 +185,16 @@ function CheckoutForm() {
       },
       paymentMethod,
       ...(paymentMethod === "DIGITAL" && { paymentGateway }),
+      couponCode: appliedCoupon ? appliedCoupon.code : undefined,
     };
 
     try {
       const response = await createOrder(orderPayload).unwrap();
       if (response.status === "success") {
         if (response.paymentUrl) {
-          // Clear cart before redirecting
-          dispatch(clearCart());
           // Redirect to payment gateway URL (bKash or SSLCommerz)
+          // Note: Cart is NOT cleared here so that if the user cancels or fails payment,
+          // their cart is preserved. It is only cleared on successful payment callback.
           window.location.href = response.paymentUrl;
           return;
         }
@@ -493,6 +573,49 @@ function CheckoutForm() {
               ))}
             </div>
 
+            {/* Promo Code Input Block */}
+            <div className="border-b border-gray-200 pb-6 mb-6">
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Have a Promo Code?</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter promo code"
+                  value={promoCodeInput}
+                  onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                  disabled={!!appliedCoupon}
+                  className="flex-1 border border-gray-200 p-2.5 text-xs focus:outline-none focus:border-black placeholder-gray-400 disabled:bg-gray-50 uppercase font-mono"
+                />
+                {appliedCoupon ? (
+                  <button
+                    type="button"
+                    onClick={handleRemovePromo}
+                    className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 px-4 transition cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    disabled={isVerifyingPromo || !promoCodeInput.trim()}
+                    className="bg-black hover:bg-zinc-800 disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed text-white text-xs font-bold py-2.5 px-4 transition cursor-pointer"
+                  >
+                    {isVerifyingPromo ? "Applying..." : "Apply"}
+                  </button>
+                )}
+              </div>
+              {promoError && (
+                <p className="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" strokeWidth={3} /> {promoError}
+                </p>
+              )}
+              {appliedCoupon && (
+                <p className="text-green-600 text-xs mt-1.5 font-bold flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3" strokeWidth={3} /> Coupon "{appliedCoupon.code}" applied!
+                </p>
+              )}
+            </div>
+
             {/* Pricing details */}
             <div className="space-y-3.5">
               <div className="flex justify-between items-center text-sm">
@@ -500,15 +623,25 @@ function CheckoutForm() {
                 <span className="font-semibold text-black">৳{subtotal.toLocaleString()}</span>
               </div>
               
+              {appliedCoupon && (
+                <div className="flex justify-between items-center text-sm text-green-600 font-medium">
+                  <span>Voucher Discount ({appliedCoupon.code})</span>
+                  <span>-৳{discountAmount.toLocaleString()}</span>
+                </div>
+              )}
+              
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-500">Shipping</span>
-                <span className="font-semibold text-black">
-                  ৳{shippingFee.toLocaleString()}
+                <span className={`font-semibold ${isFreeShipping ? "text-green-600 font-bold" : "text-black"}`}>
+                  {isFreeShipping ? "FREE" : `৳${shippingFee.toLocaleString()}`}
                 </span>
               </div>
-
+ 
               <div className="text-[10px] text-gray-400 mt-0.5 text-right font-medium">
-                Note: Delivery Inside Dhaka ৳80 | Outside Dhaka ৳120
+                {isFreeShipping 
+                  ? `Free Shipping applied (Orders over ৳${threshold.toLocaleString()})`
+                  : `Free shipping on orders over ৳${threshold.toLocaleString()} | Delivery Inside Dhaka ৳80 | Outside Dhaka ৳120`
+                }
               </div>
 
               <div className="border-t border-gray-200 pt-3.5 flex justify-between items-center text-base">

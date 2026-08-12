@@ -8,6 +8,8 @@ export interface UserProfile {
   name: string;
   email: string;
   role?: string;
+  phone?: string;
+  profileImage?: string;
 }
 
 interface UserState {

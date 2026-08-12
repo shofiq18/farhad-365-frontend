@@ -39,6 +39,14 @@ export const orderApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Order"],
     }),
+    reInitiatePayment: builder.mutation<any, { id: string; paymentGateway: "SSLCOMMERZ" | "BKASH" }>({
+      query: ({ id, paymentGateway }) => ({
+        url: `/orders/${id}/re-initiate-payment`,
+        method: "POST",
+        body: { paymentGateway },
+      }),
+      invalidatesTags: ["Order"],
+    }),
   }),
 });
 
@@ -48,4 +56,5 @@ export const {
   useCreateOrderMutation,
   useGetMyOrdersQuery,
   useGetOrderByIdQuery,
+  useReInitiatePaymentMutation,
 } = orderApi;

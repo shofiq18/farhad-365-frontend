@@ -9,7 +9,6 @@
 
 
 
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -22,13 +21,16 @@ import {
   Menu,
   X,
   Settings2,
-  Table,
+  LayoutDashboard,
   ShoppingCart,
-  User,
+  Users,
   Layers2,
   UserPen,
   TagIcon,
-  TextQuote,
+  FileText,
+  BookOpen,
+  Package,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
@@ -37,14 +39,16 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
-  { title: "Dashboard", icon: Table, href: "/dashboard" },
+  { title: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
   { title: "Orders", icon: ShoppingCart, href: "/dashboard/orders" },
-  { title: "Quotation", icon: TextQuote, href: "/dashboard/quotation" },
-  { title: "User Management", icon: User, href: "/dashboard/user-management" },
-  { title: "Products", icon: Table, href: "/dashboard/products" },
+  { title: "Products", icon: Package, href: "/dashboard/products" },
   { title: "Categories", icon: Layers2, href: "/dashboard/categories" },
   { title: "Discount", icon: TagIcon, href: "/dashboard/discount" },
+  { title: "User Management", icon: Users, href: "/dashboard/user-management" },
+  { title: "Quotation", icon: FileText, href: "/dashboard/quotation" },
   { title: "Content", icon: Settings2, href: "/dashboard/content" },
+  { title: "Blogs", icon: BookOpen, href: "/dashboard/blogs" },
+  { title: "Payment History", icon: CreditCard, href: "/dashboard/payment-history" },
   { title: "Profile", icon: UserPen, href: "/dashboard/profile" },
 ];
 
@@ -79,12 +83,15 @@ export function DashboardSidebar() {
         {!collapsed && (
           <Link href="/" className="flex items-center">
             <Image
-              src="/icon/dashboard-logo.png"
+              src="/main-logo.jpg"
               alt="Logo"
-              width={139}
-              height={50}
-              className="w-auto"
+              width={40}
+              height={30}
+              className="h-9 w-auto object-contain select-none invert transition duration-200"
             />
+            <span className="ml-3 text-lg font-bold text-gray-800">
+              Pristto
+            </span>
           </Link>
         )}
         {/* Desktop toggle */}

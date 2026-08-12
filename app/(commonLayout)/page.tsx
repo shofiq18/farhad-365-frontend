@@ -12,13 +12,17 @@ import {
   Loader2,
   Heart,
   Play,
-  Pause
+  Pause,
+  Copy
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { toggleWishlist } from "@/redux/wishlistSlice";
 import { useGetCategoriesQuery } from "@/redux/api/category/categoryApi";
 import { useGetProductsQuery } from "@/redux/api/product/productApi";
+import { useGetActiveDiscountQuery } from "@/redux/api/discount/discountApi";
+import { useGetAllSettingsQuery } from "@/redux/api/setting/settingApi";
 
 // Curated high-quality Nike-style lifestyle imagery for the three core categories
 const CATEGORY_IMAGE_MAP: Record<string, string> = {
@@ -85,6 +89,10 @@ export default function Home() {
   
   const { data: categoriesData, isLoading: isCategoriesLoading } = useGetCategoriesQuery();
   const { data: productsData, isLoading: isProductsLoading } = useGetProductsQuery({ limit: 16 });
+  const { data: activeDiscountResponse } = useGetActiveDiscountQuery();
+  const activeDiscount = activeDiscountResponse?.data;
+  const { data: settingsResponse } = useGetAllSettingsQuery();
+  const settings = settingsResponse?.data?.map || {};
   
   const carouselRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -224,36 +232,62 @@ export default function Home() {
   return (
     <div className="bg-white text-black font-sans antialiased">
       
-      {/* ── PROMO BANNER BAR (NIKE STYLE BACK TO SCHOOL SALE) ── */}
+      {/* ── PROMO BANNER BAR (DYNAMIC PROMO BANNER) ── */}
       <div className="bg-[#111111] text-[#9eff00] py-6 border-b border-zinc-900 w-full select-none font-sans">
         <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           
           {/* 1. Left Block */}
           <div className="text-sm md:text-[16px] font-semibold tracking-wider uppercase">
-            BACK TO SCHOOL SALE
+            {activeDiscount ? `${activeDiscount.code} SALE` : "BACK TO SCHOOL SALE"}
           </div>
 
-          {/* 2. Middle Block (contains 2 divs with justify-between) */}
+          {/* 2. Middle Block */}
           <div className="flex items-center justify-between gap-12 md:gap-24 w-full max-w-[450px]">
             {/* Text sub-div */}
             <div className="text-left leading-tight">
-              <div className="text-xs md:text-[15px] font-black uppercase tracking-wider">EXTRA 25% OFF</div>
-              <div className="text-[10px] md:text-[15px] font-extrabold uppercase tracking-widest text-[#9eff00]">SELECT STYLES</div>
+              <div className="text-xs md:text-[15px] font-black uppercase tracking-wider">
+                {activeDiscount 
+                  ? `EXTRA ${activeDiscount.type === "PERCENTAGE" ? `${activeDiscount.discountValue}%` : `৳${activeDiscount.discountValue}`} OFF`
+                  : "EXTRA 25% OFF"
+                }
+              </div>
+              <div className="text-[10px] md:text-[15px] font-extrabold uppercase tracking-widest text-[#9eff00]">
+                {activeDiscount ? "ON FIXED PRICE STYLES" : "SELECT STYLES"}
+              </div>
             </div>
             
             {/* Logo sub-div */}
             <div className="flex items-center">
               <img 
                 src="/main-logo.jpg" 
-                alt="Farhad365 Logo" 
+                alt="Pristto Logo" 
                 className="h-10 w-auto object-contain hover:scale-105 transition-transform duration-200 select-none" 
               />
             </div>
           </div>
 
-          {/* 3. Right Block */}
-          <div className="text-sm md:text-[15px] font-black tracking-wider uppercase">
-            CODE: DAYONE
+          {/* 3. Right Block (Copyable Pill) */}
+          <div className="flex flex-wrap items-center gap-3 justify-center sm:justify-start">
+            {activeDiscount && activeDiscount.minSpend > 0 && (
+              <span className="text-xs md:text-sm font-black tracking-wider uppercase text-zinc-300">
+                Min Buy ৳{activeDiscount.minSpend.toLocaleString()}
+              </span>
+            )}
+            {activeDiscount && activeDiscount.minSpend > 0 && (
+              <span className="text-zinc-700 hidden sm:inline">|</span>
+            )}
+            <button
+              onClick={() => {
+                const code = activeDiscount ? activeDiscount.code : "DAYONE";
+                navigator.clipboard.writeText(code);
+                toast.success(`Coupon code "${code}" copied!`);
+              }}
+              className="group inline-flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 text-[#9eff00] hover:bg-white hover:text-black hover:border-white transition-all duration-200 py-1.5 px-3.5 rounded-full text-xs md:text-sm font-black tracking-wider uppercase cursor-pointer select-none"
+              title="Click to copy coupon code"
+            >
+              CODE: {activeDiscount ? activeDiscount.code : "DAYONE"}
+              <Copy className="h-3.5 w-3.5 text-[#9eff00] group-hover:text-black transition-colors" />
+            </button>
           </div>
 
         </div>
@@ -279,10 +313,10 @@ export default function Home() {
               Just Released
             </span>
             <h1 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-6 max-w-4xl drop-shadow-sm">
-              WIN ON YOUR TERMS
+              {settings.hero_title || "WIN ON YOUR TERMS"}
             </h1>
             <p className="text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-8 font-medium drop-shadow-sm">
-              Step into limitlessness with our brand new seasonal collections. Engineered with lightweight, premium fabrics designed for peak movement and performance.
+              {settings.hero_subtitle || "Step into limitlessness with our brand new seasonal collections. Engineered with lightweight, premium fabrics designed for peak movement and performance."}
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
@@ -446,7 +480,7 @@ export default function Home() {
         {/* Left-aligned editorial text overlay */}
         <div className="absolute inset-0 z-20 flex flex-col justify-end px-6 md:px-16 lg:px-24 pb-14 md:pb-20 text-white">
           <span className="text-[10px] md:text-xs font-black tracking-[0.3em] uppercase text-zinc-300 mb-3 block">
-            FARHAD365 MOTION
+            PRISTTO MOTION
           </span>
           <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase leading-none mb-4 max-w-2xl">
             MOVEMENT<br />IS LIFE
@@ -824,16 +858,16 @@ export default function Home() {
           </h2>
           <div className="text-xs md:text-base text-zinc-200 space-y-4 max-w-4xl leading-relaxed text-start font-normal">
             <p>
-              Farhad365 is your all-in-one lifestyle destination. We bring together the very best in fashion clothing, luxury perfumes, premium watches and the latest sportswear — so you never have to shop anywhere else. Whether you're refreshing your wardrobe with the latest seasonal styles, finding a signature scent, investing in a timepiece that turns heads, or gearing up for your next workout, Farhad365 has you covered for every occasion and every mood.
+              Pristto is your all-in-one lifestyle destination. We bring together the very best in fashion clothing, luxury perfumes, premium watches and the latest sportswear — so you never have to shop anywhere else. Whether you're refreshing your wardrobe with the latest seasonal styles, finding a signature scent, investing in a timepiece that turns heads, or gearing up for your next workout, Pristto has you covered for every occasion and every mood.
             </p>
             <p>
-              Explore our clothing collection featuring everyday essentials and statement pieces for Men, Women and Kids. Discover a curated selection of perfumes and fragrances from around the world — from fresh and light to bold and intense. Browse our watch collection for elegant dress watches, smart sports watches and everything in between. And now, step into our expanding sports range with performance sneakers, activewear and accessories designed for training, running and beyond. One brand. Every lifestyle. Farhad365.
+              Explore our clothing collection featuring everyday essentials and statement pieces for Men, Women and Kids. Discover a curated selection of perfumes and fragrances from around the world — from fresh and light to bold and intense. Browse our watch collection for elegant dress watches, smart sports watches and everything in between. And now, step into our expanding sports range with performance sneakers, activewear and accessories designed for training, running and beyond. One brand. Every lifestyle. Pristto.
             </p>
           </div>
-          {/* Farhad365 brand icon */}
+          {/* Pristto brand icon */}
           <img 
             src="/main-logo.jpg" 
-            alt="Farhad365 Logo" 
+            alt="Pristto Logo" 
             className="h-14 w-auto object-contain mx-auto mt-8 select-none" 
           />
         </div>
