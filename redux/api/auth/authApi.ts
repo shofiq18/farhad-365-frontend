@@ -1,6 +1,6 @@
 
 
-import { IBaseResponse, IForgotPasswordPayload, IUserRespon, IUserResponse, IVerifyOTPPayload } from "@/types/global";
+import { IBaseResponse, IForgotPasswordPayload, IUserRespon, IUserResponse, IVerifyOTPPayload, IResendOTPReqBody } from "@/types/global";
 import baseApi from "../baseApi";
 
 
@@ -216,6 +216,14 @@ const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    resendOtp: builder.mutation<IBaseResponse, IResendOTPReqBody>({
+      query: (body) => ({
+        url: "/otp/resend",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -227,6 +235,7 @@ export const {
   useResetPasswordMutation,
   useSetUpPasswordMutation,
   useVerifyOtpMutation,
+  useResendOtpMutation,
   useGetAllResourceQuery,
   useUpdateProfileMutation,
   useGetAllUsersQuery,

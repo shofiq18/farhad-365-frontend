@@ -75,6 +75,14 @@ export default function AdminOrdersPage() {
 
   const orders = ordersData?.data || [];
 
+  const isGiftCardOrder = (order: any) =>
+    order?.giftCard ||
+    order?.items?.some(
+      (item: any) =>
+        item.sku === "E-GIFT-CARD" ||
+        item.title?.toLowerCase().includes("gift card")
+    );
+
   // Filter orders
   const filteredOrders = orders.filter((order: any) => {
     const matchesSearch =
@@ -82,7 +90,12 @@ export default function AdminOrdersPage() {
       order.user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.user?.email?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "ALL" || order.status === statusFilter;
-    const matchesMethod = methodFilter === "ALL" || order.paymentMethod === methodFilter;
+    const matchesMethod =
+      methodFilter === "ALL"
+        ? true
+        : methodFilter === "GIFTCARD"
+        ? isGiftCardOrder(order)
+        : order.paymentMethod === methodFilter;
 
     return matchesSearch && matchesStatus && matchesMethod;
   });
@@ -178,6 +191,7 @@ export default function AdminOrdersPage() {
                   <option value="ALL">All Methods</option>
                   <option value="COD">Cash on Delivery</option>
                   <option value="DIGITAL">Digital Payment</option>
+                  <option value="GIFTCARD">🎁 E-Gift Cards</option>
                 </select>
               </div>
             </div>
@@ -208,7 +222,14 @@ export default function AdminOrdersPage() {
                     paginatedOrders.map((order: any) => (
                       <tr key={order.id} className="hover:bg-gray-50/50 transition">
                         <td className="py-4 px-6 font-mono text-xs text-gray-500">
-                          {order.id}
+                          <div className="flex flex-col gap-1 items-start">
+                            <span>{order.id}</span>
+                            {isGiftCardOrder(order) && (
+                              <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                🎁 E-Gift Card
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-4 px-6">
                           <div className="font-semibold text-gray-900">{order.user?.name || "Anonymous"}</div>
@@ -321,22 +342,56 @@ export default function AdminOrdersPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left/Middle: Items & Address details */}
               <div className="lg:col-span-2 space-y-6">
-                {/* Shipping info */}
-                <div className="border p-5 rounded-xl space-y-4">
+                {/* Gift Card Highlight Banner if applicable */}
+                {isGiftCardOrder(selectedOrder) && (
+                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-3">
+                    <div className="p-2 bg-amber-100 rounded-lg text-amber-900 font-bold text-lg">🎁</div>
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-black uppercase text-amber-900 tracking-wider">
+                        Digital E-Gift Card Order (Auto-Delivered)
+                      </h4>
+                      <p className="text-xs text-amber-800 leading-relaxed">
+                        This is an electronic gift card purchase. The gift voucher code was automatically generated and sent via email directly to the recipient. No physical courier delivery is required.
+                      </p>
+                      {selectedOrder.giftCard && (
+                        <div className="mt-2 pt-2 border-t border-amber-200 text-xs font-mono text-amber-950 flex flex-wrap gap-x-4 gap-y-1">
+                          <span><strong>Voucher Code:</strong> {selectedOrder.giftCard.code}</span>
+                          <span><strong>Sender:</strong> {selectedOrder.giftCard.senderName}</span>
+                          <span><strong>Recipient:</strong> {selectedOrder.giftCard.recipientEmail}</span>
+                          <span><strong>Balance:</strong> ৳{selectedOrder.giftCard.balance?.toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Delivery info */}
+                <div className={`border p-5 rounded-xl space-y-4 ${isGiftCardOrder(selectedOrder) ? "bg-amber-50/30 border-amber-200" : ""}`}>
                   <h3 className="text-xs font-extrabold uppercase text-black tracking-wider flex items-center gap-1.5">
                     <MapPin className="h-4 w-4" />
-                    Shipping & Delivery Address
+                    {isGiftCardOrder(selectedOrder) ? "Digital Delivery Info" : "Shipping & Delivery Address"}
                   </h3>
                   <div className="text-sm space-y-1 font-medium text-gray-700 pl-5.5">
                     <p className="flex items-center gap-2">
                       <User className="h-3.5 w-3.5 text-gray-400" />
-                      {selectedOrder.user?.name}
+                      {selectedOrder.user?.name} ({selectedOrder.user?.email})
                     </p>
-                    <p>{selectedOrder.shippingAddress?.street}</p>
-                    <p>
-                      {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state} {selectedOrder.shippingAddress?.zipCode}
-                    </p>
-                    <p>{selectedOrder.shippingAddress?.country}</p>
+                    {isGiftCardOrder(selectedOrder) ? (
+                      <>
+                        <p className="text-xs font-bold text-amber-900 mt-2">
+                          Recipient Email: {selectedOrder.giftCard?.recipientEmail || selectedOrder.shippingAddress?.street}
+                        </p>
+                        <p className="text-xs text-gray-500 italic">Electronic Delivery via Email (No physical shipping required)</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>{selectedOrder.shippingAddress?.street}</p>
+                        <p>
+                          {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state} {selectedOrder.shippingAddress?.zipCode}
+                        </p>
+                        <p>{selectedOrder.shippingAddress?.country}</p>
+                      </>
+                    )}
                     <p className="flex items-center gap-2 mt-2 pt-2 border-t text-xs font-bold text-black">
                       <Phone className="h-3.5 w-3.5 text-gray-400" />
                       Phone Contact: {selectedOrder.shippingAddress?.phone}

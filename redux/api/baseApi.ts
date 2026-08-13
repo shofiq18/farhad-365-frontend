@@ -28,6 +28,7 @@ export const baseApi = createApi({
     "Discount",
     "Quotation",
     "Setting",
+    "GiftCard",
   ],
 });
 

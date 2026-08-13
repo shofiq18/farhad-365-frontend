@@ -57,7 +57,7 @@ export default function Footer() {
               <img 
                 src="/main-logo.jpg" 
                 alt="Pristto Logo" 
-                className="h-10 w-auto object-contain hover:scale-105 transition-transform duration-200 select-none invert" 
+                className="h-14 w-auto object-contain mx-auto mt-8 select-none" 
               />
             </Link>
             <p className="text-[13px] text-zinc-300 font-medium leading-relaxed max-w-sm">

@@ -438,23 +438,40 @@ export default function DashboardOverview() {
                     </td>
                   </tr>
                 )}
-                {recentOrders.map((order: any) => (
-                  <tr key={order.id || order._id} className="border-t border-zinc-100 hover:bg-zinc-50 transition">
-                    <td className="px-5 py-4 font-bold text-black truncate max-w-[120px]" title={order.id || order._id}>
-                      {order.id || order._id}
-                    </td>
-                    <td className="px-5 py-4 font-bold text-zinc-900">৳{(order.totalAmount || 0).toLocaleString()}</td>
-                    <td className="px-5 py-4 text-zinc-500 text-xs font-semibold">{order.paymentMethod === "COD" ? "COD" : "bKash"}</td>
-                    <td className="px-5 py-4">
-                      <span className={`inline-block px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${STATUS_BADGES[order.status] || STATUS_BADGES.PENDING}`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-zinc-400 text-xs">
-                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
-                    </td>
-                  </tr>
-                ))}
+                {recentOrders.map((order: any) => {
+                  const isGc =
+                    order?.giftCard ||
+                    order?.items?.some(
+                      (item: any) =>
+                        item.sku === "E-GIFT-CARD" ||
+                        item.title?.toLowerCase().includes("gift card")
+                    );
+
+                  return (
+                    <tr key={order.id || order._id} className="border-t border-zinc-100 hover:bg-zinc-50 transition">
+                      <td className="px-5 py-4 font-bold text-black truncate max-w-[150px]" title={order.id || order._id}>
+                        <div className="flex flex-col gap-0.5">
+                          <span>{order.id || order._id}</span>
+                          {isGc && (
+                            <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-900 border border-amber-300 text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-wider w-fit">
+                              🎁 E-Gift Card
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 font-bold text-zinc-900">৳{(order.totalAmount || 0).toLocaleString()}</td>
+                      <td className="px-5 py-4 text-zinc-500 text-xs font-semibold">{order.paymentMethod === "COD" ? "COD" : "bKash"}</td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-block px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${STATUS_BADGES[order.status] || STATUS_BADGES.PENDING}`}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-zinc-400 text-xs">
+                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

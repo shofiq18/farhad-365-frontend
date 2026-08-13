@@ -116,7 +116,14 @@ export default function LoginForm() {
         <div className=" w-full max-w-2xl gap-2 overflow-hidden  ">
           {/* Right: Form */}
           <div className="flex flex-col justify-center p-6 mt-20 mb-12 md:mx-24 bg-white">
-            <div className="mb-6 ">
+            <div className="mb-6 text-center">
+              <Link href="/" className="inline-block mb-4">
+                <img
+                  src="/main-logo.jpg"
+                  alt="Pristto Logo"
+                  className="h-14 w-auto object-contain mx-auto select-none invert"
+                />
+              </Link>
               <h1 className="text-3xl font-bold text-black">Welcome Back</h1>
               <p className="mt-4 text-sm text-black">
                 Log in to continue your application

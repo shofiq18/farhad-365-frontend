@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useRouter } from "next/navigation";
+import { usePurchaseGiftCardMutation } from "@/redux/api/giftcard/giftcardApi";
 
 export default function GiftCardsPage() {
   const [selectedAmount, setSelectedAmount] = useState<number>(2000);
@@ -9,16 +13,38 @@ export default function GiftCardsPage() {
   const [senderName, setSenderName] = useState("");
   const [message, setMessage] = useState("");
 
-  const handlePurchase = (e: React.FormEvent) => {
+  const { user } = useSelector((state: RootState) => state.user);
+  const router = useRouter();
+  const [purchaseGiftCard, { isLoading }] = usePurchaseGiftCardMutation();
+
+  const handlePurchase = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast.error("Please log in to purchase a Gift Card.");
+      router.push(`/login?redirect=/gift-cards`);
+      return;
+    }
     if (!recipientEmail || !senderName) {
       toast.error("Please fill in the required fields.");
       return;
     }
-    toast.success(`E-Gift Card of ৳${selectedAmount.toLocaleString()} has been added to your cart!`);
-    setRecipientEmail("");
-    setSenderName("");
-    setMessage("");
+    try {
+      const response = await purchaseGiftCard({
+        amount: selectedAmount,
+        recipientEmail,
+        senderName,
+        message,
+      }).unwrap();
+
+      if (response.status === "success" && response.paymentUrl) {
+        toast.success("Redirecting to bKash for payment...");
+        window.location.href = response.paymentUrl;
+      } else {
+        toast.error("Failed to initiate payment gateway.");
+      }
+    } catch (err: any) {
+      toast.error(err?.data?.message || "An error occurred while purchasing the gift card.");
+    }
   };
 
   const amounts = [1000, 2000, 5000, 10000];
@@ -125,9 +151,10 @@ export default function GiftCardsPage() {
 
             <button
               type="submit"
-              className="w-full bg-black hover:bg-zinc-800 text-white font-bold py-4 text-xs uppercase tracking-wider rounded-full transition cursor-pointer"
+              disabled={isLoading}
+              className="w-full bg-black hover:bg-zinc-800 text-white font-bold py-4 text-xs uppercase tracking-wider rounded-full transition cursor-pointer disabled:bg-zinc-400 disabled:cursor-not-allowed"
             >
-              Add to Cart
+              {isLoading ? "Redirecting..." : "Purchase with bKash"}
             </button>
           </form>
         </div>

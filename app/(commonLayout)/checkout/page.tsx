@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useGetAllSettingsQuery } from "@/redux/api/setting/settingApi";
+import { useValidateGiftCardMutation } from "@/redux/api/giftcard/giftcardApi";
 
 export default function CheckoutPage() {
   return (
@@ -37,6 +38,7 @@ function CheckoutForm() {
 
   const [createOrder, { isLoading: isPlacingOrder }] = useCreateOrderMutation();
   const [validateDiscount, { isLoading: isVerifyingPromo }] = useValidateDiscountMutation();
+  const [validateGiftCard, { isLoading: isVerifyingGiftCard }] = useValidateGiftCardMutation();
   const { data: settingsResponse } = useGetAllSettingsQuery();
   const settings = settingsResponse?.data?.map || {};
 
@@ -54,6 +56,11 @@ function CheckoutForm() {
   const [promoCodeInput, setPromoCodeInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [promoError, setPromoError] = useState("");
+
+  // Gift Card State
+  const [giftCardCodeInput, setGiftCardCodeInput] = useState("");
+  const [appliedGiftCard, setAppliedGiftCard] = useState<any>(null);
+  const [giftCardError, setGiftCardError] = useState("");
 
   // Load saved phone and address defaults from localStorage
   useEffect(() => {
@@ -124,7 +131,10 @@ function CheckoutForm() {
   const threshold = settings.free_shipping_threshold ? parseFloat(settings.free_shipping_threshold) : 1000;
   const isFreeShipping = subtotal >= threshold;
   const shippingFee = isFreeShipping ? 0.0 : (state.toLowerCase() === "dhaka" ? 80.0 : 120.0);
-  const total = Math.max(0, subtotal - discountAmount) + shippingFee;
+  const amountBeforeGiftCard = Math.max(0, subtotal - discountAmount) + shippingFee;
+
+  const giftCardDiscount = appliedGiftCard ? Math.min(appliedGiftCard.balance, amountBeforeGiftCard) : 0;
+  const total = Math.max(0, amountBeforeGiftCard - giftCardDiscount);
 
   const handleApplyPromo = async () => {
     if (!promoCodeInput.trim()) return;
@@ -156,6 +166,32 @@ function CheckoutForm() {
     toast.success("Promo code removed.");
   };
 
+  const handleApplyGiftCard = async () => {
+    if (!giftCardCodeInput.trim()) return;
+    setGiftCardError("");
+    try {
+      const response = await validateGiftCard({
+        code: giftCardCodeInput.trim(),
+      }).unwrap();
+
+      if (response.status === "success" && response.data) {
+        setAppliedGiftCard(response.data);
+        setGiftCardError("");
+        toast.success("Gift Card applied!");
+      }
+    } catch (err: any) {
+      setGiftCardError(err?.data?.message || "Failed to validate gift card.");
+      setAppliedGiftCard(null);
+    }
+  };
+
+  const handleRemoveGiftCard = () => {
+    setAppliedGiftCard(null);
+    setGiftCardCodeInput("");
+    setGiftCardError("");
+    toast.success("Gift Card removed.");
+  };
+
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -183,9 +219,10 @@ function CheckoutForm() {
         country: "Bangladesh",
         phone,
       },
-      paymentMethod,
-      ...(paymentMethod === "DIGITAL" && { paymentGateway }),
+      paymentMethod: total === 0 ? "COD" : paymentMethod,
+      ...(total > 0 && paymentMethod === "DIGITAL" && { paymentGateway }),
       couponCode: appliedCoupon ? appliedCoupon.code : undefined,
+      giftCardCode: appliedGiftCard ? appliedGiftCard.code : undefined,
     };
 
     try {
@@ -457,63 +494,65 @@ function CheckoutForm() {
               </div>
 
               {/* Payment Method Selector */}
-              <div className="pt-6">
-                <h2 className="text-lg font-bold text-black border-b border-gray-100 pb-3 mb-4 flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-black" /> Payment Method
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                  {/* COD */}
-                  <label 
-                    className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
-                      paymentMethod === "COD" ? "border-black bg-gray-50" : "border-gray-200 hover:border-black"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="COD"
-                      checked={paymentMethod === "COD"}
-                      onChange={() => setPaymentMethod("COD")}
-                      className="mt-1 accent-black"
-                    />
-                    <div>
-                      <p className="text-sm font-bold text-black">Cash on Delivery</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Pay in cash when your order is delivered.</p>
-                    </div>
-                  </label>
-
-                  {/* bKash */}
-                  <label 
-                    className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
-                      paymentMethod === "DIGITAL" ? "border-black bg-gray-50" : "border-gray-200 hover:border-black"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="DIGITAL"
-                      checked={paymentMethod === "DIGITAL"}
-                      onChange={() => {
-                        setPaymentMethod("DIGITAL");
-                        setPaymentGateway("BKASH");
-                      }}
-                      className="mt-1.5 accent-black"
-                    />
-                    <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
-                      <div>
-                        <p className="text-sm font-bold text-black">Pay with bKash</p>
-                        <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Pay securely via your bKash wallet.</p>
-                      </div>
-                      <img 
-                        src="/bkash.png" 
-                        alt="bKash Logo" 
-                        className="h-8 object-contain shrink-0"
+              {total > 0 && (
+                <div className="pt-6">
+                  <h2 className="text-lg font-bold text-black border-b border-gray-100 pb-3 mb-4 flex items-center gap-2">
+                    <CreditCard className="h-5 w-5 text-black" /> Payment Method
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {/* COD */}
+                    <label 
+                      className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
+                        paymentMethod === "COD" ? "border-black bg-gray-50" : "border-gray-200 hover:border-black"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="COD"
+                        checked={paymentMethod === "COD"}
+                        onChange={() => setPaymentMethod("COD")}
+                        className="mt-1 accent-black"
                       />
-                    </div>
-                  </label>
+                      <div>
+                        <p className="text-sm font-bold text-black">Cash on Delivery</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Pay in cash when your order is delivered.</p>
+                      </div>
+                    </label>
+
+                    {/* bKash */}
+                    <label 
+                      className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
+                        paymentMethod === "DIGITAL" ? "border-black bg-gray-50" : "border-gray-200 hover:border-black"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="DIGITAL"
+                        checked={paymentMethod === "DIGITAL"}
+                        onChange={() => {
+                          setPaymentMethod("DIGITAL");
+                          setPaymentGateway("BKASH");
+                        }}
+                        className="mt-1.5 accent-black"
+                      />
+                      <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
+                        <div>
+                          <p className="text-sm font-bold text-black">Pay with bKash</p>
+                          <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Pay securely via your bKash wallet.</p>
+                        </div>
+                        <img 
+                          src="/bkash.png" 
+                          alt="bKash Logo" 
+                          className="h-8 object-contain shrink-0"
+                        />
+                      </div>
+                    </label>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Submit Button */}
               <div className="pt-4">
@@ -616,6 +655,49 @@ function CheckoutForm() {
               )}
             </div>
 
+            {/* Gift Card Input Block */}
+            <div className="border-b border-gray-200 pb-6 mb-6">
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Have a Gift Card?</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter gift card code"
+                  value={giftCardCodeInput}
+                  onChange={(e) => setGiftCardCodeInput(e.target.value.toUpperCase())}
+                  disabled={!!appliedGiftCard}
+                  className="flex-1 border border-gray-200 p-2.5 text-xs focus:outline-none focus:border-black placeholder-gray-400 disabled:bg-gray-50 uppercase font-mono"
+                />
+                {appliedGiftCard ? (
+                  <button
+                    type="button"
+                    onClick={handleRemoveGiftCard}
+                    className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 px-4 transition cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleApplyGiftCard}
+                    disabled={isVerifyingGiftCard || !giftCardCodeInput.trim()}
+                    className="bg-black hover:bg-zinc-800 disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed text-white text-xs font-bold py-2.5 px-4 transition cursor-pointer"
+                  >
+                    {isVerifyingGiftCard ? "Applying..." : "Apply"}
+                  </button>
+                )}
+              </div>
+              {giftCardError && (
+                <p className="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" strokeWidth={3} /> {giftCardError}
+                </p>
+              )}
+              {appliedGiftCard && (
+                <p className="text-green-600 text-xs mt-1.5 font-bold flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3" strokeWidth={3} /> Gift Card applied! (Balance: ৳{appliedGiftCard.balance.toLocaleString()})
+                </p>
+              )}
+            </div>
+
             {/* Pricing details */}
             <div className="space-y-3.5">
               <div className="flex justify-between items-center text-sm">
@@ -627,6 +709,13 @@ function CheckoutForm() {
                 <div className="flex justify-between items-center text-sm text-green-600 font-medium">
                   <span>Voucher Discount ({appliedCoupon.code})</span>
                   <span>-৳{discountAmount.toLocaleString()}</span>
+                </div>
+              )}
+
+              {appliedGiftCard && (
+                <div className="flex justify-between items-center text-sm text-green-600 font-medium">
+                  <span>Gift Card ({appliedGiftCard.code})</span>
+                  <span>-৳{giftCardDiscount.toLocaleString()}</span>
                 </div>
               )}
               
