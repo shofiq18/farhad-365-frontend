@@ -13,6 +13,8 @@ const SETTING_LABELS: Record<string, { label: string; description: string; multi
   support_address: { label: "Physical Address", description: "Your store or office address." },
   footer_about: { label: "Footer About Text", description: "Short description of the brand shown in the footer.", multiline: true },
   free_shipping_threshold: { label: "Free Shipping Threshold (৳)", description: "Minimum order amount to qualify for free shipping." },
+  inside_dhaka_shipping: { label: "Inside Dhaka Delivery Charge (৳)", description: "Shipping cost for deliveries inside Dhaka area (default: 80)." },
+  outside_dhaka_shipping: { label: "Outside Dhaka Delivery Charge (৳)", description: "Shipping cost for deliveries outside Dhaka area (default: 120)." },
 };
 
 export default function ContentSettingsPage() {

@@ -190,6 +190,7 @@ export default function AdminOrdersPage() {
                 >
                   <option value="ALL">All Methods</option>
                   <option value="COD">Cash on Delivery</option>
+                  <option value="BKASH">bKash Manual</option>
                   <option value="DIGITAL">Digital Payment</option>
                   <option value="GIFTCARD">🎁 E-Gift Cards</option>
                 </select>
@@ -433,9 +434,20 @@ export default function AdminOrdersPage() {
                       <span className="text-gray-500">Method</span>
                       <span className="text-gray-900 font-bold uppercase flex items-center gap-1">
                         <CreditCard className="h-3.5 w-3.5 text-gray-400" />
-                        {selectedOrder.paymentMethod}
+                        {selectedOrder.paymentMethod === "BKASH" ? "bKash (Manual)" : selectedOrder.paymentMethod}
                       </span>
                     </div>
+                    {(selectedOrder.bkashTrxId || selectedOrder.bkashNumber) && (
+                      <div className="p-3 bg-pink-50 border border-pink-200 rounded-lg text-xs space-y-1 mt-2">
+                        <p className="font-extrabold text-pink-900 uppercase tracking-wider">bKash Manual Payment</p>
+                        <p className="text-pink-950 font-mono">
+                          <strong>TrxID:</strong> <span className="font-extrabold text-pink-700">{selectedOrder.bkashTrxId}</span>
+                        </p>
+                        <p className="text-pink-950 font-mono">
+                          <strong>Sender Phone:</strong> {selectedOrder.bkashNumber}
+                        </p>
+                      </div>
+                    )}
                     {selectedOrder.couponCode && (
                       <>
                         <div className="flex justify-between font-medium pt-2 border-t">

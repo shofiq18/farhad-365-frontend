@@ -6,7 +6,7 @@ import { RootState } from "@/redux/store";
 import { clearCart } from "@/redux/cartSlice";
 import { useCreateOrderMutation } from "@/redux/api/order/orderApi";
 import { useValidateDiscountMutation } from "@/redux/api/discount/discountApi";
-import { Loader, CheckCircle, AlertCircle, ShoppingBag, Truck, CreditCard } from "lucide-react";
+import { Loader, CheckCircle, AlertCircle, ShoppingBag, Truck, CreditCard, Copy, Check } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
@@ -49,8 +49,11 @@ function CheckoutForm() {
   const [state, setState] = useState("Dhaka");
   const [zipCode, setZipCode] = useState("");
   const [phone, setPhone] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"COD" | "DIGITAL">("COD");
+  const [paymentMethod, setPaymentMethod] = useState<"COD" | "BKASH" | "DIGITAL">("COD");
   const [paymentGateway, setPaymentGateway] = useState<"SSLCOMMERZ" | "BKASH">("BKASH");
+  const [bkashSenderNumber, setBkashSenderNumber] = useState("");
+  const [bkashTrxId, setBkashTrxId] = useState("");
+  const [copiedBkash, setCopiedBkash] = useState(false);
 
   // Promo Code State
   const [promoCodeInput, setPromoCodeInput] = useState("");
@@ -127,14 +130,27 @@ function CheckoutForm() {
   const subtotal = items.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
   
-  // Dynamic free shipping threshold
+  // Dynamic free shipping threshold & delivery fees from settings
   const threshold = settings.free_shipping_threshold ? parseFloat(settings.free_shipping_threshold) : 1000;
+  const insideDhakaFee = settings.inside_dhaka_shipping ? parseFloat(settings.inside_dhaka_shipping) : 80.0;
+  const outsideDhakaFee = settings.outside_dhaka_shipping ? parseFloat(settings.outside_dhaka_shipping) : 120.0;
+
   const isFreeShipping = subtotal >= threshold;
-  const shippingFee = isFreeShipping ? 0.0 : (state.toLowerCase() === "dhaka" ? 80.0 : 120.0);
+  const isDhaka = state.toLowerCase() === "dhaka" || city.toLowerCase() === "dhaka";
+  const shippingFee = isFreeShipping ? 0.0 : (isDhaka ? insideDhakaFee : outsideDhakaFee);
   const amountBeforeGiftCard = Math.max(0, subtotal - discountAmount) + shippingFee;
 
   const giftCardDiscount = appliedGiftCard ? Math.min(appliedGiftCard.balance, amountBeforeGiftCard) : 0;
   const total = Math.max(0, amountBeforeGiftCard - giftCardDiscount);
+
+  const merchantBkashNumber = settings.bkash_number || settings.bkashNumber || "01712345678";
+
+  const handleCopyBkashNumber = () => {
+    navigator.clipboard.writeText(merchantBkashNumber);
+    setCopiedBkash(true);
+    toast.success("bKash number copied to clipboard!");
+    setTimeout(() => setCopiedBkash(false), 3000);
+  };
 
   const handleApplyPromo = async () => {
     if (!promoCodeInput.trim()) return;
@@ -206,6 +222,17 @@ function CheckoutForm() {
       return;
     }
 
+    if (total > 0 && paymentMethod === "BKASH") {
+      if (!bkashSenderNumber.trim()) {
+        toast.error("Please enter your bKash Sender Phone Number.");
+        return;
+      }
+      if (!bkashTrxId.trim()) {
+        toast.error("Please enter your bKash Transaction ID (TrxID).");
+        return;
+      }
+    }
+
     const orderPayload = {
       items: items.map((item) => ({
         variantId: item.variantId,
@@ -221,6 +248,10 @@ function CheckoutForm() {
       },
       paymentMethod: total === 0 ? "COD" : paymentMethod,
       ...(total > 0 && paymentMethod === "DIGITAL" && { paymentGateway }),
+      ...(total > 0 && paymentMethod === "BKASH" && {
+        bkashNumber: bkashSenderNumber.trim(),
+        bkashTrxId: bkashTrxId.trim(),
+      }),
       couponCode: appliedCoupon ? appliedCoupon.code : undefined,
       giftCardCode: appliedGiftCard ? appliedGiftCard.code : undefined,
     };
@@ -322,8 +353,17 @@ function CheckoutForm() {
                 <div>
                   <p className="text-[10px] font-bold text-gray-400 uppercase">Payment Method</p>
                   <p className="text-xs font-bold text-gray-800">
-                    {orderSuccess.paymentMethod === "COD" ? "Cash on Delivery" : "bKash Payment"}
+                    {orderSuccess.paymentMethod === "COD" 
+                      ? "Cash on Delivery" 
+                      : orderSuccess.paymentMethod === "BKASH" 
+                      ? "bKash (Manual Payment)" 
+                      : "Digital Payment"}
                   </p>
+                  {orderSuccess.bkashTrxId && (
+                    <p className="text-[11px] text-gray-600 font-mono mt-1">
+                      TrxID: <span className="font-bold text-black">{orderSuccess.bkashTrxId}</span> | Phone: {orderSuccess.bkashNumber}
+                    </p>
+                  )}
                 </div>
               </>
             )}
@@ -415,7 +455,7 @@ function CheckoutForm() {
               {/* Form Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Street Address</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Street Address</label>
                   <input
                     type="text"
                     required
@@ -427,7 +467,7 @@ function CheckoutForm() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">City / District</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">City / District</label>
                   <input
                     type="text"
                     required
@@ -439,7 +479,7 @@ function CheckoutForm() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Division</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Division</label>
                   <select
                     required
                     value={state}
@@ -458,7 +498,7 @@ function CheckoutForm() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Thana / Upazila (Optional)</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Thana / Upazila (Optional)</label>
                   <input
                     type="text"
                     value={thana}
@@ -469,7 +509,7 @@ function CheckoutForm() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Zip / Postal Code</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Zip / Postal Code</label>
                   <input
                     type="text"
                     required
@@ -481,7 +521,7 @@ function CheckoutForm() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Phone Number</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Phone Number</label>
                   <input
                     type="tel"
                     required
@@ -500,56 +540,126 @@ function CheckoutForm() {
                     <CreditCard className="h-5 w-5 text-black" /> Payment Method
                   </h2>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                    {/* COD */}
-                    <label 
-                      className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
-                        paymentMethod === "COD" ? "border-black bg-gray-50" : "border-gray-200 hover:border-black"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="COD"
-                        checked={paymentMethod === "COD"}
-                        onChange={() => setPaymentMethod("COD")}
-                        className="mt-1 accent-black"
-                      />
-                      <div>
-                        <p className="text-sm font-bold text-black">Cash on Delivery</p>
-                        <p className="text-xs text-gray-500 mt-0.5">Pay in cash when your order is delivered.</p>
-                      </div>
-                    </label>
-
-                    {/* bKash */}
-                    <label 
-                      className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
-                        paymentMethod === "DIGITAL" ? "border-black bg-gray-50" : "border-gray-200 hover:border-black"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="DIGITAL"
-                        checked={paymentMethod === "DIGITAL"}
-                        onChange={() => {
-                          setPaymentMethod("DIGITAL");
-                          setPaymentGateway("BKASH");
-                        }}
-                        className="mt-1.5 accent-black"
-                      />
-                      <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
-                        <div>
-                          <p className="text-sm font-bold text-black">Pay with bKash</p>
-                          <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Pay securely via your bKash wallet.</p>
-                        </div>
-                        <img 
-                          src="/bkash.png" 
-                          alt="bKash Logo" 
-                          className="h-8 object-contain shrink-0"
+                  <div className="space-y-3.5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                      {/* COD */}
+                      <label 
+                        className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
+                          paymentMethod === "COD" ? "border-black bg-gray-50" : "border-gray-200 hover:border-black"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="COD"
+                          checked={paymentMethod === "COD"}
+                          onChange={() => setPaymentMethod("COD")}
+                          className="mt-1 accent-black"
                         />
+                        <div>
+                          <p className="text-sm font-bold text-black">Cash on Delivery</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Pay in cash when your order is delivered.</p>
+                        </div>
+                      </label>
+
+                      {/* bKash */}
+                      <label 
+                        className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
+                          paymentMethod === "BKASH" ? "border-pink-600 bg-pink-50/40" : "border-gray-200 hover:border-black"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="BKASH"
+                          checked={paymentMethod === "BKASH"}
+                          onChange={() => setPaymentMethod("BKASH")}
+                          className="mt-1.5 accent-pink-600"
+                        />
+                        <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
+                          <div>
+                            <p className="text-sm font-bold text-black">Pay with bKash</p>
+                            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Send payment to our bKash number.</p>
+                          </div>
+                          <img 
+                            src="/bkash.png" 
+                            alt="bKash Logo" 
+                            className="h-8 object-contain shrink-0"
+                          />
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* bKash Inline Details Expandable Section */}
+                    {paymentMethod === "BKASH" && (
+                      <div className="p-5 bg-gradient-to-br from-pink-50/80 to-rose-50 border border-pink-200 rounded-xl space-y-4 transition-all">
+                        <div className="flex items-center justify-between border-b border-pink-200/80 pb-3.5">
+                          <div>
+                            <span className="text-xs font-bold text-pink-700">Our bKash Account</span>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-base font-black text-pink-950 tracking-wider font-mono">
+                                {merchantBkashNumber}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={handleCopyBkashNumber}
+                                className="inline-flex items-center gap-1 bg-white hover:bg-pink-100 border border-pink-300 text-pink-700 text-xs font-bold px-2.5 py-1 rounded-full transition cursor-pointer"
+                              >
+                                {copiedBkash ? (
+                                  <>
+                                    <Check className="h-3.5 w-3.5 text-green-600" />
+                                    <span className="text-green-600">Copied!</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="h-3.5 w-3.5 text-pink-700" />
+                                    <span>Copy Number</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs font-medium text-gray-500">Amount to Send</span>
+                            <p className="text-sm font-black text-pink-700">৳{total.toLocaleString()}</p>
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-gray-600 leading-relaxed">
+                          Please Send Money / Pay <strong>৳{total.toLocaleString()}</strong> to the bKash number above. After completing the transaction, enter your sender number and Transaction ID (TrxID) below:
+                        </p>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">
+                              Your bKash Number (Sender) <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="tel"
+                              required
+                              value={bkashSenderNumber}
+                              onChange={(e) => setBkashSenderNumber(e.target.value)}
+                              placeholder="017XXXXXXXX"
+                              className="w-full bg-white border border-pink-200 p-2.5 text-sm focus:outline-none focus:border-pink-600 focus:ring-1 focus:ring-pink-600 placeholder-gray-400 font-medium"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">
+                              Transaction ID (TrxID) <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={bkashTrxId}
+                              onChange={(e) => setBkashTrxId(e.target.value)}
+                              placeholder="e.g. 9B7X2K4M1"
+                              className="w-full bg-white border border-pink-200 p-2.5 text-sm focus:outline-none focus:border-pink-600 focus:ring-1 focus:ring-pink-600 placeholder-gray-400 font-mono font-medium"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </label>
+                    )}
                   </div>
                 </div>
               )}

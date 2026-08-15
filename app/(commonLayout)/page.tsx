@@ -232,61 +232,61 @@ export default function Home() {
   return (
     <div className="bg-white text-black font-sans antialiased">
       
-      {/* ── PROMO BANNER BAR (DYNAMIC PROMO BANNER) ── */}
-      <div className="bg-[#111111] text-[#9eff00] py-6 border-b border-zinc-900 w-full select-none font-sans">
-        <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      {/* ── PROMO BANNER BAR (EXACT NIKE LOOK FOR LG & MOBILE) ── */}
+      <div className="bg-[#111111] text-[#9eff00] py-3 sm:py-4 border-b border-zinc-900 w-full select-none font-sans overflow-hidden">
+        <div className="mx-auto max-w-[1920px] px-3 sm:px-6 md:px-12 lg:px-16 flex items-center justify-between gap-2 sm:gap-4 text-center">
           
-          {/* 1. Left Block */}
-          <div className="text-sm md:text-[16px] font-semibold tracking-wider uppercase">
-            {activeDiscount ? `${activeDiscount.code} SALE` : "BACK TO SCHOOL SALE"}
-          </div>
-
-          {/* 2. Middle Block */}
-          <div className="flex items-center justify-between gap-12 md:gap-24 w-full max-w-[450px]">
-            {/* Text sub-div */}
-            <div className="text-left leading-tight">
-              <div className="text-xs md:text-[15px] font-black uppercase tracking-wider">
-                {activeDiscount 
-                  ? `EXTRA ${activeDiscount.type === "PERCENTAGE" ? `${activeDiscount.discountValue}%` : `৳${activeDiscount.discountValue}`} OFF`
-                  : "EXTRA 25% OFF"
-                }
-              </div>
-              <div className="text-[10px] md:text-[15px] font-extrabold uppercase tracking-widest text-[#9eff00]">
-                {activeDiscount ? "ON FIXED PRICE STYLES" : "SELECT STYLES"}
-              </div>
+          {/* 1. Left Block: Sale Title (Single inline line on md/lg screens) */}
+          <div className="text-left shrink-0">
+            <div className="hidden md:block text-[11px] sm:text-xs md:text-sm lg:text-[15px] font-black tracking-wider uppercase text-[#9eff00] whitespace-nowrap">
+              {activeDiscount ? `${activeDiscount.code} SALE` : "BACK TO SCHOOL SALE"}
             </div>
-            
-            {/* Logo sub-div */}
-            <div className="flex items-center">
-              <img 
-                src="/main-logo.jpg" 
-                alt="Pristto Logo" 
-                className="h-10 w-auto object-contain hover:scale-105 transition-transform duration-200 select-none" 
-              />
+            {/* Mobile fallback (2 lines on small screens) */}
+            <div className="md:hidden leading-tight">
+              <div className="text-[10px] sm:text-xs font-black tracking-wider uppercase text-[#9eff00]">
+                {activeDiscount ? activeDiscount.code : "BACK TO SCHOOL"}
+              </div>
+              <div className="text-[9px] sm:text-[11px] font-black tracking-widest uppercase text-[#9eff00]">
+                SALE
+              </div>
             </div>
           </div>
 
-          {/* 3. Right Block (Copyable Pill) */}
-          <div className="flex flex-wrap items-center gap-3 justify-center sm:justify-start">
-            {activeDiscount && activeDiscount.minSpend > 0 && (
-              <span className="text-xs md:text-sm font-black tracking-wider uppercase text-zinc-300">
-                Min Buy ৳{activeDiscount.minSpend.toLocaleString()}
-              </span>
-            )}
-            {activeDiscount && activeDiscount.minSpend > 0 && (
-              <span className="text-zinc-700 hidden sm:inline">|</span>
-            )}
+          {/* 2. Middle Block: Discount Offer */}
+          <div className="text-center leading-tight shrink-0">
+            <div className="text-[10px] sm:text-xs md:text-sm font-extrabold uppercase tracking-wider text-[#9eff00]">
+              {activeDiscount 
+                ? `EXTRA ${activeDiscount.type === "PERCENTAGE" ? `${activeDiscount.discountValue}%` : `৳${activeDiscount.discountValue}`} OFF`
+                : "EXTRA 25% OFF"
+              }
+            </div>
+            <div className="text-[9px] sm:text-[11px] md:text-sm font-extrabold uppercase tracking-widest text-[#9eff00]">
+              {activeDiscount ? "FIXED PRICE STYLES" : "SELECT STYLES"}
+            </div>
+          </div>
+
+          {/* 3. Logo Block: Pristto Logo (Shown on large screens like Nike's screenshot) */}
+          <div className="hidden lg:flex items-center shrink-0 px-2">
+            <img 
+              src="/main-logo.jpg" 
+              alt="Pristto Logo" 
+              className="h-9 lg:h-11 xl:h-12 w-auto object-contain select-none hover:scale-105 transition-transform duration-200" 
+            />
+          </div>
+
+          {/* 4. Right Block: Coupon Code Button */}
+          <div className="flex justify-end items-center shrink-0">
             <button
               onClick={() => {
                 const code = activeDiscount ? activeDiscount.code : "DAYONE";
                 navigator.clipboard.writeText(code);
                 toast.success(`Coupon code "${code}" copied!`);
               }}
-              className="group inline-flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 text-[#9eff00] hover:bg-white hover:text-black hover:border-white transition-all duration-200 py-1.5 px-3.5 rounded-full text-xs md:text-sm font-black tracking-wider uppercase cursor-pointer select-none"
+              className="inline-flex items-center gap-1 text-[10px] sm:text-xs md:text-sm font-extrabold tracking-wider uppercase text-[#9eff00] hover:text-white transition-colors cursor-pointer select-none whitespace-nowrap"
               title="Click to copy coupon code"
             >
               CODE: {activeDiscount ? activeDiscount.code : "DAYONE"}
-              <Copy className="h-3.5 w-3.5 text-[#9eff00] group-hover:text-black transition-colors" />
+              <Copy className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#9eff00] shrink-0" />
             </button>
           </div>
 
@@ -295,8 +295,8 @@ export default function Home() {
 
       {/* ── HERO BANNER SECTION ── */}
       <section className="w-full relative">
-        <div className="relative w-full aspect-[21/9] md:aspect-[2.3/1] min-h-[400px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
-          <div className="absolute inset-0 bg-black/10 z-10" />
+        <div className="relative w-full aspect-[3/4] sm:aspect-[21/9] md:aspect-[2.3/1] min-h-[500px] sm:min-h-[440px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/20 z-10" />
           {/* Full-screen background video */}
           <video
             autoPlay
@@ -308,26 +308,26 @@ export default function Home() {
             <source src="/videos/gym.mp4" type="video/mp4" />
           </video>
           
-          <div className="relative z-20 mx-auto w-full max-w-[1920px] px-6 md:px-12 lg:px-16 pb-12 md:pb-20 text-white">
-            <span className="text-[12px] md:text-sm font-black tracking-widest text-[#f5f5f5] uppercase mb-3 block">
+          <div className="relative z-20 mx-auto w-full max-w-[1920px] px-4 sm:px-6 md:px-12 lg:px-16 pb-10 sm:pb-12 md:pb-20 text-white">
+            <span className="text-[11px] sm:text-xs md:text-sm font-black tracking-widest text-[#f5f5f5] uppercase mb-2 sm:mb-3 block">
               Just Released
             </span>
-            <h1 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-6 max-w-4xl drop-shadow-sm">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-3 sm:mb-6 max-w-4xl drop-shadow-sm">
               {settings.hero_title || "WIN ON YOUR TERMS"}
             </h1>
-            <p className="text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-8 font-medium drop-shadow-sm">
+            <p className="text-xs sm:text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-6 sm:mb-8 font-medium drop-shadow-sm line-clamp-3 sm:line-clamp-none">
               {settings.hero_subtitle || "Step into limitlessness with our brand new seasonal collections. Engineered with lightweight, premium fabrics designed for peak movement and performance."}
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3 sm:gap-4">
               <Link
                 href="/shop"
-                className="rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-3 px-8 text-xs font-bold tracking-wider uppercase border border-white"
+                className="rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase border border-white"
               >
                 Shop Collection
               </Link>
               <Link
                 href="/shop?targetGroup=MEN"
-                className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-3 px-8 text-xs font-bold tracking-wider uppercase border-2 border-white"
+                className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase border-2 border-white"
               >
                 Shop Men&#39;s
               </Link>
@@ -336,13 +336,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── EXACT NIKE STYLE CATEGORY GRID (3 CORE CARDS) ── */}
-      <section id="categories" className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-20 scroll-mt-16">
-        <div className="text-center mb-12">
-          <h2 className="text-5xl md:text-7xl font-black tracking-tight text-black uppercase leading-none select-none" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+      {/* ── EXACT NIKE STYLE CATEGORY GRID (BEST IN CLASS) ── */}
+      <section id="categories" className="mx-auto max-w-[1920px] px-0 sm:px-6 md:px-12 lg:px-16 mt-12 sm:mt-16 md:mt-20 scroll-mt-16">
+        <div className="text-center mb-8 sm:mb-12 px-4 sm:px-0">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-black uppercase leading-none select-none" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             BEST IN CLASS
           </h2>
-          <p className="text-xs md:text-sm font-semibold text-zinc-900 mt-4 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm font-semibold text-zinc-800 mt-2 sm:mt-4 max-w-2xl mx-auto leading-relaxed">
             From class to sport, find back-to-school essentials for day one and beyond.
           </p>
         </div>
@@ -352,22 +352,23 @@ export default function Home() {
             <Loader2 className="animate-spin h-8 w-8 text-black" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-6">
             {displayCategories.map((cat) => (
               <Link 
                 key={cat.id} 
                 href={cat.shopUrl}
-                className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 shadow-sm cursor-pointer"
+                className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 shadow-sm cursor-pointer rounded-none"
               >
                 <img
                   src={cat.image}
                   alt={cat.name}
-                  className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+                  className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
                   loading="lazy"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 sm:hidden" />
 
-                <div className="absolute bottom-8 left-8 z-20">
-                  <span className="inline-block text-white font-semibold text-xl md:text-2xl hover:text-zinc-300 transition duration-300 tracking-wide cursor-pointer">
+                <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8 z-20">
+                  <span className="inline-block text-white font-bold text-xl sm:text-xl md:text-2xl hover:text-zinc-300 transition duration-300 tracking-wide cursor-pointer drop-shadow-sm">
                     {cat.name}
                   </span>
                 </div>
@@ -378,9 +379,9 @@ export default function Home() {
       </section>
 
       {/* ── DYNAMIC POPULAR RIGHT NOW PRODUCTS GRID ── */}
-      <section className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-28 mb-28">
-        <div className="mb-8">
-          <h2 className="text-2xl md:text-3xl font-black tracking-tight text-black uppercase">
+      <section className="mx-auto max-w-[1920px] px-0 sm:px-6 md:px-12 lg:px-16 mt-16 sm:mt-24 md:mt-28 mb-16 sm:mb-24 md:mb-28">
+        <div className="mb-6 sm:mb-8 px-4 sm:px-0">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-black uppercase">
             Popular Right Now
           </h2>
         </div>
@@ -397,7 +398,7 @@ export default function Home() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6">
             {productsList.slice(0, 4).map((product: any) => {
               const discountedPrice =
                 product.discount > 0
@@ -410,12 +411,12 @@ export default function Home() {
                   className="w-full group flex flex-col relative cursor-pointer"
                 >
                   {/* Image container */}
-                  <div className="relative w-full aspect-[4/5] bg-gray-100 overflow-hidden mb-4 border border-zinc-100 cursor-pointer">
+                  <div className="relative w-full aspect-[4/5] bg-gray-100 overflow-hidden mb-2 sm:mb-4 border border-zinc-100 cursor-pointer">
                     {product.images?.[0] ? (
                       <img
                         src={product.images[0]}
                         alt={product.title}
-                        className="w-full h-full object-cover object-top select-none cursor-pointer"
+                        className="w-full h-full object-cover object-top select-none cursor-pointer group-hover:scale-105 transition duration-500"
                         loading="lazy"
                       />
                     ) : (
@@ -429,29 +430,29 @@ export default function Home() {
                   </div>
 
                   {/* Info */}
-                  <div className="flex flex-col">
-                    <p className="text-[11px] font-semibold text-gray-400 tracking-wider">
+                  <div className="flex flex-col px-2 sm:px-0">
+                    <p className="text-[10px] sm:text-[11px] font-semibold text-gray-400 tracking-wider">
                       {product.category?.name || "Sportswear"}
                     </p>
                     <Link 
                       href={`/products/${product.slug}`}
-                      className="text-[15px] font-medium text-black truncate mt-0.5 cursor-pointer"
+                      className="text-xs sm:text-[15px] font-medium text-black truncate mt-0.5 cursor-pointer"
                     >
                       {product.title}
                     </Link>
                     
-                    <div className="flex items-center gap-2 mt-1.5">
+                    <div className="flex items-center gap-2 mt-1 sm:mt-1.5">
                       {discountedPrice ? (
                         <>
-                          <span className="text-sm font-bold text-black">
+                          <span className="text-xs sm:text-sm font-bold text-black">
                             ৳{discountedPrice.toLocaleString()}
                           </span>
-                          <span className="text-xs text-gray-400 line-through">
+                          <span className="text-[11px] sm:text-xs text-gray-400 line-through">
                             ৳{product.price.toLocaleString()}
                           </span>
                         </>
                       ) : (
-                        <span className="text-sm font-bold text-black">
+                        <span className="text-xs sm:text-sm font-bold text-black">
                           ৳{product.price.toLocaleString()}
                         </span>
                       )}
@@ -465,7 +466,7 @@ export default function Home() {
       </section>
 
       {/* ── FULL WIDTH VIDEO SECTOR ── */}
-      <section className="w-full aspect-[16/9] md:aspect-[21/9] bg-black relative overflow-hidden select-none">
+      <section className="w-full aspect-[3/4] sm:aspect-[16/9] md:aspect-[21/9] min-h-[480px] sm:min-h-[450px] bg-black relative overflow-hidden select-none">
         <video
           autoPlay
           loop
@@ -476,22 +477,22 @@ export default function Home() {
           <source src="/videos/running.mp4" type="video/mp4" />
         </video>
         {/* Subtle gradient overlay — heavier at bottom for text legibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent z-10" />
         {/* Left-aligned editorial text overlay */}
-        <div className="absolute inset-0 z-20 flex flex-col justify-end px-6 md:px-16 lg:px-24 pb-14 md:pb-20 text-white">
-          <span className="text-[10px] md:text-xs font-black tracking-[0.3em] uppercase text-zinc-300 mb-3 block">
+        <div className="absolute inset-0 z-20 flex flex-col justify-end px-6 sm:px-8 md:px-16 lg:px-24 pb-10 sm:pb-14 md:pb-20 text-white">
+          <span className="text-[10px] sm:text-xs font-black tracking-[0.3em] uppercase text-zinc-300 mb-2 sm:mb-3 block">
             PRISTTO MOTION
           </span>
-          <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase leading-none mb-4 max-w-2xl">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter uppercase leading-none mb-3 sm:mb-4 max-w-2xl">
             MOVEMENT<br />IS LIFE
           </h2>
-          <p className="text-xs md:text-sm text-zinc-300 max-w-sm leading-relaxed mb-7 font-normal">
+          <p className="text-xs sm:text-sm text-zinc-200 max-w-xs sm:max-w-sm leading-relaxed mb-6 sm:mb-7 font-normal line-clamp-3 sm:line-clamp-none">
             Engineered to keep you moving forward. Performance activewear crafted for speed, agility, and recovery.
           </p>
           <div>
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 rounded-full bg-white text-black hover:bg-zinc-100 transition duration-300 py-3 px-8 text-xs font-bold tracking-wider uppercase"
+              className="inline-flex items-center gap-2 rounded-full bg-white text-black hover:bg-zinc-100 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase"
             >
               Explore Activewear <span className="text-sm">→</span>
             </Link>
@@ -500,36 +501,36 @@ export default function Home() {
       </section>
 
       {/* ── EXACT NIKE STYLE FEATURED CAMPAIGNS GRID ── */}
-      <section className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-24">
-        <div className="mb-8">
-          <h2 className="text-2xl md:text-3xl font-black tracking-tight text-black uppercase">
+      <section className="mx-auto max-w-[1920px] px-0 sm:px-6 md:px-12 lg:px-16 mt-16 sm:mt-24">
+        <div className="mb-6 sm:mb-8 px-3 sm:px-0">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-black uppercase">
             Featured
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
           
           {/* Campaign 1: Run Free */}
           <div className="flex flex-col group cursor-pointer">
             <div className="relative aspect-[4/5] overflow-hidden bg-zinc-100 shadow-sm cursor-pointer">
               <img
-              src="/run free.avif"
-              alt="Jordan Kids"
-              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
-              loading="lazy"
-            />
+                src="/run free.avif"
+                alt="Jordan Kids"
+                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
+                loading="lazy"
+              />
               <Link href="/shop?category=shoes" className="absolute inset-0 z-20 cursor-pointer" />
             </div>
-            <div className="mt-5">
-              <h3 className="text-[15px] font-medium text-black tracking-tight cursor-pointer">
+            <div className="mt-4 sm:mt-5 px-3 sm:px-0">
+              <h3 className="text-sm sm:text-[15px] font-medium text-black tracking-tight cursor-pointer">
                 Run Free
               </h3>
-              <p className="text-xs text-zinc-500 font-semibold leading-relaxed mt-1.5 max-w-[320px]">
+              <p className="text-xs text-zinc-500 font-semibold leading-relaxed mt-1 sm:mt-1.5 max-w-[320px]">
                 Ultra-responsive road runners engineered to cushion and accelerate every single step.
               </p>
               <Link 
                 href="/shop?category=shoes" 
-                className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-3.5 tracking-wide transition cursor-pointer"
+                className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-2.5 sm:mt-3.5 tracking-wide transition cursor-pointer"
               >
                 Shop Footwear
               </Link>
@@ -542,21 +543,21 @@ export default function Home() {
               <img
                 src="/men.jpg"
                 alt="Streetwear style campaign"
-                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
                 loading="lazy"
               />
               <Link href="/shop?targetGroup=UNISEX" className="absolute inset-0 z-20 cursor-pointer" />
             </div>
-            <div className="mt-5">
-              <h3 className="text-[15px] font-medium text-black tracking-tight cursor-pointer">
+            <div className="mt-4 sm:mt-5 px-3 sm:px-0">
+              <h3 className="text-sm sm:text-[15px] font-medium text-black tracking-tight cursor-pointer">
                 Street Essentials
               </h3>
-              <p className="text-xs text-zinc-500 font-semibold leading-relaxed mt-1.5 max-w-[320px]">
+              <p className="text-xs text-zinc-500 font-semibold leading-relaxed mt-1 sm:mt-1.5 max-w-[320px]">
                 Reimagined everyday basics designed to look completely effortless, anywhere and everywhere.
               </p>
               <Link 
                 href="/shop?targetGroup=UNISEX" 
-                className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-3.5 tracking-wide transition cursor-pointer"
+                className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-2.5 sm:mt-3.5 tracking-wide transition cursor-pointer"
               >
                 Shop Streetwear
               </Link>
@@ -569,21 +570,21 @@ export default function Home() {
               <img
                 src="/featured.avif"
                 alt="Jordan Kids"
-                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
                 loading="lazy"
               />
               <Link href="/shop?category=clothing" className="absolute inset-0 z-20 cursor-pointer" />
             </div>
-            <div className="mt-5">
-              <h3 className="text-[15px] font-medium text-black tracking-tight cursor-pointer">
+            <div className="mt-4 sm:mt-5 px-3 sm:px-0">
+              <h3 className="text-sm sm:text-[15px] font-medium text-black tracking-tight cursor-pointer">
                 Peak Recovery
               </h3>
-              <p className="text-xs text-zinc-500 font-semibold leading-relaxed mt-1.5 max-w-[320px]">
+              <p className="text-xs text-zinc-500 font-semibold leading-relaxed mt-1 sm:mt-1.5 max-w-[320px]">
                 Sweat-wicking performance clothing built to withstand high-intensity reps and active training.
               </p>
               <Link 
                 href="/shop?category=clothing" 
-                className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-3.5 tracking-wide transition cursor-pointer"
+                className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-2.5 sm:mt-3.5 tracking-wide transition cursor-pointer"
               >
                 Shop Training
               </Link>
@@ -594,8 +595,8 @@ export default function Home() {
       </section>
 
       {/* ── SPECIAL AUTOPLAY HERO CAROUSEL SECTION ── */}
-      <section className="w-full relative mt-20 select-none">
-        <div className="relative w-full aspect-[21/9] md:aspect-[2.3/1] min-h-[450px] md:min-h-[550px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
+      <section className="w-full relative mt-16 sm:mt-24 select-none">
+        <div className="relative w-full aspect-[3/4] sm:aspect-[21/9] md:aspect-[2.3/1] min-h-[520px] sm:min-h-[580px] md:min-h-[640px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
           
           {/* Slides */}
           {SPECIAL_CAROUSEL_SLIDES.map((slide, index) => {
@@ -734,28 +735,28 @@ export default function Home() {
       </section>
 
       {/* ── BACK TO SCHOOL SECTION ── */}
-      <section className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-28 mb-28">
-        <div className="text-center mb-12 select-none">
-          <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-black uppercase leading-none" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+      <section className="mx-auto max-w-[1920px] px-0 sm:px-6 md:px-12 lg:px-16 mt-16 sm:mt-24 md:mt-28 mb-16 sm:mb-24 md:mb-28">
+        <div className="text-center mb-8 sm:mb-12 select-none px-4 sm:px-0">
+          <h2 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter text-black uppercase leading-none" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             BACK TO SCHOOL
           </h2>
-          <p className="text-xs md:text-sm font-semibold text-zinc-600 mt-4 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm font-semibold text-zinc-600 mt-2 sm:mt-4 max-w-2xl mx-auto leading-relaxed">
             Mix and match with ease, because every piece plays.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           {/* Card 1: Jordan Kids */}
-          <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer">
+          <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer rounded-none">
             <img
               src="/original.avif"
               alt="Jordan Kids"
-              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10 cursor-pointer" />
-            <div className="relative z-20 p-8 flex flex-col items-start justify-end h-full text-white cursor-pointer">
-              <p className="text-[17px] font-bold leading-snug mb-4 max-w-[260px] cursor-pointer">
+            <div className="relative z-20 p-6 sm:p-8 flex flex-col items-start justify-end h-full text-white cursor-pointer">
+              <p className="text-base sm:text-[17px] font-bold leading-snug mb-3 sm:mb-4 max-w-[260px] cursor-pointer">
                 Bring serious style to their everyday game.
               </p>
               <Link
@@ -769,16 +770,16 @@ export default function Home() {
           </div>
 
           {/* Card 2: Bags & Backpacks */}
-          <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer">
+          <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer rounded-none">
             <img
               src="/original (1).avif"
               alt="Bags & Backpacks"
-              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10 cursor-pointer" />
-            <div className="relative z-20 p-8 flex flex-col items-start justify-end h-full text-white cursor-pointer">
-              <p className="text-[17px] font-bold leading-snug mb-4 max-w-[260px] cursor-pointer">
+            <div className="relative z-20 p-6 sm:p-8 flex flex-col items-start justify-end h-full text-white cursor-pointer">
+              <p className="text-base sm:text-[17px] font-bold leading-snug mb-3 sm:mb-4 max-w-[260px] cursor-pointer">
                 Find the perfect bag for carrying their gear comfortably.
               </p>
               <Link
@@ -792,16 +793,16 @@ export default function Home() {
           </div>
 
           {/* Card 3: Nike Kids */}
-          <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer">
+          <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer rounded-none">
             <img
               src="/original (2).avif"
               alt="Nike Kids"
-              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
+              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10 cursor-pointer" />
-            <div className="relative z-20 p-8 flex flex-col items-start justify-end h-full text-white cursor-pointer">
-              <p className="text-[17px] font-bold leading-snug mb-4 max-w-[260px] cursor-pointer">
+            <div className="relative z-20 p-6 sm:p-8 flex flex-col items-start justify-end h-full text-white cursor-pointer">
+              <p className="text-base sm:text-[17px] font-bold leading-snug mb-3 sm:mb-4 max-w-[260px] cursor-pointer">
                 Elevate their school style with essentials for the classroom and sport.
               </p>
               <Link
@@ -816,33 +817,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── DYNAMIC NIKE "TRENDING" SILHOUETTE GRID (NO BACKGROUND / TRANSPARENT) ── */}
-      <section className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 mt-28 mb-28 select-none">
-        <div className="text-center mb-12">
-          <h2 className="text-5xl md:text-7xl font-black tracking-tight text-black uppercase leading-none select-none" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+      {/* ── DYNAMIC NIKE "TRENDING" SILHOUETTE GRID (EXACT NIKE LOOK) ── */}
+      <section className="mx-auto max-w-[1920px] px-0 sm:px-6 md:px-12 lg:px-16 mt-16 sm:mt-24 md:mt-28 mb-16 sm:mb-24 md:mb-28 select-none">
+        <div className="text-center mb-8 sm:mb-12 px-4 sm:px-0">
+          <h2 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight text-black uppercase leading-none select-none" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             TRENDING
           </h2>
+          <p className="text-xs sm:text-sm md:text-base font-semibold text-zinc-900 mt-3 max-w-xl mx-auto leading-relaxed">
+            Classic silhouettes and cutting-edge innovation to build your game from the ground up.
+          </p>
         </div>
 
-        {/* 2 Rows of 8 items on desktop, wraps cleanly on tablet/mobile */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-x-6 gap-y-12 mt-12">
+        {/* 3 columns on mobile, 4 on tablet, 8 on desktop */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-8 gap-x-2 sm:gap-x-6 gap-y-8 sm:gap-y-12 mt-6 sm:mt-12 px-2 sm:px-0">
           {displayTrending.slice(0, 16).map((item: any, index: number) => (
             <Link 
               key={index} 
               href={item.link} 
               className="flex flex-col items-center group text-center cursor-pointer"
             >
-              {/* Image box - bg-transparent, no borders, no padding except standard spacing */}
-              <div className="w-full aspect-[4/3] bg-transparent flex items-center justify-center overflow-hidden cursor-pointer">
+              {/* Transparent container with uniform fixed height so all floating silhouettes align perfectly */}
+              <div className="w-full h-16 sm:h-24 bg-transparent flex items-center justify-center overflow-hidden cursor-pointer">
                 <img
                   src={item.image || ""}
                   alt={item.name}
-                  className="max-h-[75px] max-w-[110px] object-contain select-none mix-blend-multiply cursor-pointer"
+                  className="max-h-14 sm:max-h-20 w-auto max-w-full object-contain select-none cursor-pointer group-hover:scale-105 transition duration-300"
                   loading="lazy"
                 />
               </div>
               {/* Label */}
-              <span className="text-[15px] font-medium text-black mt-3 transition truncate max-w-full cursor-pointer">
+              <span className="text-xs sm:text-[15px] font-bold text-black mt-2 sm:mt-3 transition truncate max-w-full cursor-pointer group-hover:text-zinc-600">
                 {item.name}
               </span>
             </Link>

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { toggleDrawer, updateQuantity, removeFromCart } from "@/redux/cartSlice";
+import { useGetAllSettingsQuery } from "@/redux/api/setting/settingApi";
 import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 
@@ -11,6 +12,9 @@ export default function CartDrawer() {
   const { items, isDrawerOpen } = useSelector((state: RootState) => state.cart);
   const dispatch = useDispatch();
   const drawerRef = useRef<HTMLDivElement>(null);
+
+  const { data: settingsResponse } = useGetAllSettingsQuery();
+  const settings = settingsResponse?.data?.map || {};
 
   // Close drawer on clicking outside the drawer content panel
   useEffect(() => {
@@ -47,6 +51,12 @@ export default function CartDrawer() {
 
   // Subtotal calculation
   const subtotal = items.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
+
+  // Dynamic free shipping threshold & delivery fees from settings
+  const threshold = settings.free_shipping_threshold ? parseFloat(settings.free_shipping_threshold) : 1000;
+  const insideDhakaFee = settings.inside_dhaka_shipping ? parseFloat(settings.inside_dhaka_shipping) : 80;
+  const outsideDhakaFee = settings.outside_dhaka_shipping ? parseFloat(settings.outside_dhaka_shipping) : 120;
+  const isFreeShipping = subtotal >= threshold;
 
   if (!isDrawerOpen) return null;
 
@@ -181,23 +191,47 @@ export default function CartDrawer() {
 
         {/* Footer Summary (Only if items exist) */}
         {items.length > 0 && (
-          <div className="border-t border-gray-100 bg-gray-50/50 p-5 space-y-4">
-            <div className="flex justify-between items-center text-sm">
+          <div className="border-t border-gray-100 bg-gray-50/50 p-5 space-y-3">
+            {/* Free Shipping Progress Indicator */}
+            <div className="bg-white border border-gray-100 p-3 rounded-lg text-center shadow-2xs">
+              {isFreeShipping ? (
+                <p className="text-xs font-bold text-emerald-600 flex items-center justify-center gap-1">
+                  🎉 Congratulations! You qualify for FREE Delivery!
+                </p>
+              ) : (
+                <div>
+                  <p className="text-xs font-semibold text-zinc-700 mb-1.5">
+                    Add <span className="font-bold text-black">৳{(threshold - subtotal).toLocaleString()}</span> more for <span className="font-bold text-emerald-600">FREE Delivery</span>
+                  </p>
+                  <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                    <div 
+                      className="bg-emerald-500 h-full transition-all duration-300 rounded-full" 
+                      style={{ width: `${Math.min(100, (subtotal / threshold) * 100)}%` }} 
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-between items-center text-sm pt-1">
               <span className="font-semibold text-gray-600">Subtotal</span>
-              <span className="text-lg font-black text-black">৳{subtotal.toLocaleString()}</span>
+              <span className="text-base font-bold text-black">৳{subtotal.toLocaleString()}</span>
+            </div>
+
+            <div className="flex justify-between items-center text-xs text-zinc-500 border-t border-dashed border-gray-200 pt-2">
+              <span>Estimated Delivery</span>
+              <span className="font-bold text-black">
+                {isFreeShipping ? "FREE" : `৳${insideDhakaFee} (Inside Dhaka) / ৳${outsideDhakaFee} (Outside)`}
+              </span>
             </div>
             
-            <p className="text-[11px] text-gray-400 text-center">
-              Shipping & taxes are calculated at checkout.
-            </p>
-
-            <div className="grid gap-2">
+            <div className="grid gap-2 pt-1">
               <Link
                 href="/checkout"
                 onClick={handleClose}
-                className="w-full text-center bg-black hover:bg-zinc-800 text-white font-bold py-3.5 px-4 rounded-full text-sm transition cursor-pointer"
+                className="w-full text-center bg-black hover:bg-zinc-800 text-white font-bold py-3.5 px-4 rounded-full text-sm transition cursor-pointer shadow-sm"
               >
-                Checkout
+                Proceed to Checkout
               </Link>
             </div>
           </div>
