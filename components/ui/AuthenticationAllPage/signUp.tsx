@@ -327,13 +327,14 @@ export default function SignUpForm() {
                     </span>
                   </button>
 
+                  {/* Google Sign Up Button - Commented out for later implementation */}
+                  {/* 
                   <div className="relative flex py-2 items-center">
                     <div className="flex-grow border-t border-gray-300"></div>
                     <span className="flex-shrink mx-4 text-gray-500 text-xs uppercase">Or</span>
                     <div className="flex-grow border-t border-gray-300"></div>
                   </div>
 
-                  {/* Google Sign Up Button */}
                   <button
                     type="button"
                     onClick={() => toast("Google registration integration coming soon.")}
@@ -347,6 +348,7 @@ export default function SignUpForm() {
                     </svg>
                     Sign up with Google
                   </button>
+                  */}
                 </form>
 
                 <div className="mt-6 text-center text-sm">

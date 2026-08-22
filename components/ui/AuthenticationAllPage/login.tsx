@@ -270,13 +270,14 @@ export default function LoginForm() {
                 </span>
               </button>
 
+              {/* Google Login Button - Commented out for later implementation */}
+              {/* 
               <div className="relative flex py-2 items-center">
                 <div className="flex-grow border-t border-gray-300"></div>
                 <span className="flex-shrink mx-4 text-gray-500 text-xs uppercase">Or</span>
                 <div className="flex-grow border-t border-gray-300"></div>
               </div>
 
-              {/* Google Login Button */}
               <button
                 type="button"
                 onClick={() => toast("Google sign-in integration coming soon.")}
@@ -290,6 +291,7 @@ export default function LoginForm() {
                 </svg>
                 Continue with Google
               </button>
+              */}
             </form>
             <div className="mt-6 text-center text-sm">
               <p className="text-gray-600">

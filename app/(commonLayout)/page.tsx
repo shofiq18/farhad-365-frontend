@@ -54,32 +54,53 @@ const STATIC_TRENDING_FALLBACKS = [
 const SPECIAL_CAROUSEL_SLIDES = [
   {
     image: "/corousal2.webp",
-    subtitle: "The best hoopers know greatness isn't built overnight—it's forged rep after rep, detail by detail.",
-    link: "/shop?targetGroup=SPORTS",
+    tag: "JUST RELEASED",
+    title: "WIN ON YOUR TERMS",
+    subtitle: "Step into limitlessness with our brand new seasonal collections. Engineered with lightweight, premium fabrics designed for peak movement and performance.",
+    primaryBtnText: "Shop Collection",
+    primaryLink: "/shop",
+    secondaryBtnText: "Shop Men's",
+    secondaryLink: "/shop?targetGroup=MEN",
   },
   {
     image: "/corousal1.webp",
-     title: "THE STANDARD IS SET",
+    tag: "NEW ARRIVAL",
+    title: "THE STANDARD IS SET",
     subtitle: "Experience next-level cushioning and support engineered for daily runners and active athletes.",
-    link: "/shop?category=shoes",
+    primaryBtnText: "Shop Footwear",
+    primaryLink: "/shop?category=shoes",
+    secondaryBtnText: "Explore Running",
+    secondaryLink: "/shop?targetGroup=SPORTS",
   },
   {
     image: "/corousal3.webp",
+    tag: "WOMEN'S COLLECTION",
     title: "ELEVATE YOUR WORKOUT",
     subtitle: "Premium performance sportswear designed for maximum flexibility, breathability, and comfort.",
-    link: "/shop?targetGroup=WOMEN",
+    primaryBtnText: "Shop Women's",
+    primaryLink: "/shop?targetGroup=WOMEN",
+    secondaryBtnText: "View Collection",
+    secondaryLink: "/shop",
   },
   {
     image: "/corousal4.webp",
+    tag: "PRO PERFORMANCE",
     title: "DOMINATE THE STAGE",
     subtitle: "Unmatched speed meets elite comfort. Push your boundaries and exceed your goals daily.",
-    link: "/shop?targetGroup=MEN",
+    primaryBtnText: "Shop Men's",
+    primaryLink: "/shop?targetGroup=MEN",
+    secondaryBtnText: "Shop All",
+    secondaryLink: "/shop",
   },
   {
     image: "/corousal6.webp",
-    title: "PURFUMES",
-    subtitle: "Unmatched speed meets elite comfort. Push your boundaries and exceed your goals daily.",
-    link: "/shop?targetGroup=MEN",
+    tag: "LUXURY FRAGRANCE",
+    title: "SIGNATURE SCENTS",
+    subtitle: "Discover iconic fragrances crafted to complement your style with lasting elegance.",
+    primaryBtnText: "Shop Perfumes",
+    primaryLink: "/shop?category=accessories",
+    secondaryBtnText: "Explore Shop",
+    secondaryLink: "/shop",
   },
 ];
 
@@ -293,44 +314,155 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── HERO BANNER SECTION ── */}
-      <section className="w-full relative">
-        <div className="relative w-full aspect-[3/4] sm:aspect-[21/9] md:aspect-[2.3/1] min-h-[500px] sm:min-h-[440px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
-          <div className="absolute inset-0 bg-black/20 z-10" />
-          {/* Full-screen background video */}
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover object-center select-none"
-          >
-            <source src="/videos/gym.mp4" type="video/mp4" />
-          </video>
+      {/* ── SPECIAL AUTOPLAY HERO CAROUSEL SECTION ── */}
+      <section className="w-full relative select-none">
+        <div className="relative w-full aspect-[3/4] sm:aspect-[21/9] md:aspect-[2.3/1] min-h-[520px] sm:min-h-[580px] md:min-h-[640px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
           
-          <div className="relative z-20 mx-auto w-full max-w-[1920px] px-4 sm:px-6 md:px-12 lg:px-16 pb-10 sm:pb-12 md:pb-20 text-white">
-            <span className="text-[11px] sm:text-xs md:text-sm font-black tracking-widest text-[#f5f5f5] uppercase mb-2 sm:mb-3 block">
-              Just Released
-            </span>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-3 sm:mb-6 max-w-4xl drop-shadow-sm">
-              {settings.hero_title || "WIN ON YOUR TERMS"}
-            </h1>
-            <p className="text-xs sm:text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-6 sm:mb-8 font-medium drop-shadow-sm line-clamp-3 sm:line-clamp-none">
-              {settings.hero_subtitle || "Step into limitlessness with our brand new seasonal collections. Engineered with lightweight, premium fabrics designed for peak movement and performance."}
-            </p>
-            <div className="flex flex-wrap gap-3 sm:gap-4">
-              <Link
-                href="/shop"
-                className="rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase border border-white"
+          {/* Slides */}
+          {SPECIAL_CAROUSEL_SLIDES.map((slide, index) => {
+            const active = index === currentSlide;
+            return (
+              <div
+                key={index}
+                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+                  active ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                }`}
               >
-                Shop Collection
-              </Link>
-              <Link
-                href="/shop?targetGroup=MEN"
-                className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase border-2 border-white"
+                {/* Background Image */}
+                <img
+                  src={slide.image}
+                  alt={slide.title}
+                  className="absolute inset-0 w-full h-full object-cover object-center select-none"
+                />
+                
+                {/* Dark overlay for readability */}
+                <div className="absolute inset-0 bg-black/25" />
+
+                {/* Redirect whole slide overlay */}
+                <Link
+                  href={slide.primaryLink || "/shop"}
+                  className="absolute inset-0 z-20 cursor-pointer"
+                  aria-label={`Shop ${slide.title}`}
+                />
+                
+                {/* Slide content */}
+                <div className="relative z-25 mx-auto w-full max-w-[1920px] h-full flex flex-col justify-end pb-12 sm:pb-16 md:pb-20 text-white px-4 sm:px-6 md:px-12 lg:px-16 pointer-events-none">
+                  {slide.tag && (
+                    <span className="text-[11px] sm:text-xs md:text-sm font-black tracking-widest text-[#f5f5f5] uppercase mb-2 sm:mb-3 block drop-shadow-sm">
+                      {slide.tag}
+                    </span>
+                  )}
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-3 sm:mb-6 max-w-4xl drop-shadow-sm animate-fade-in" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+                    {slide.title}
+                  </h1>
+                  <p className="text-xs sm:text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-6 sm:mb-8 font-medium drop-shadow-sm line-clamp-3 sm:line-clamp-none">
+                    {slide.subtitle}
+                  </p>
+                  <div className="flex flex-wrap gap-3 sm:gap-4 pointer-events-auto">
+                    <Link
+                      href={slide.primaryLink || "/shop"}
+                      className="rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase border border-white cursor-pointer"
+                    >
+                      {slide.primaryBtnText || "Shop Collection"}
+                    </Link>
+                    {slide.secondaryBtnText && (
+                      <Link
+                        href={slide.secondaryLink || "/shop"}
+                        className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase border-2 border-white cursor-pointer"
+                      >
+                        {slide.secondaryBtnText}
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Controls overlay in the bottom right and dots in the bottom center */}
+          <div className="absolute bottom-6 left-0 right-0 z-30 flex items-center justify-between px-8 md:px-16 pointer-events-none">
+            {/* Center dots indicators */}
+            <div className="flex-1 flex justify-center gap-2 pointer-events-auto">
+              {SPECIAL_CAROUSEL_SLIDES.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setCurrentSlide(index);
+                    setProgress(0);
+                  }}
+                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    index === currentSlide ? "w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            {/* Bottom-right Controls */}
+            <div className="flex items-center gap-3 pointer-events-auto">
+              {/* Play/Pause Button with Circular Progress Ring */}
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="w-11 h-11 relative flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-all cursor-pointer backdrop-blur-sm"
+                aria-label={isPlaying ? "Pause autoplay" : "Start autoplay"}
               >
-                Shop Men&#39;s
-              </Link>
+                {/* SVG Progress Ring */}
+                <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 44 44">
+                  {/* Background Track */}
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    className="stroke-white/20 fill-none"
+                    strokeWidth="2.5"
+                  />
+                  {/* Active Progress Path */}
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    className="stroke-white fill-none transition-all duration-75"
+                    strokeWidth="2.5"
+                    strokeDasharray="113.1"
+                    strokeDashoffset={113.1 - (progress / 100) * 113.1}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                {/* Icon (centered on top) */}
+                <div className="relative z-10 flex items-center justify-center">
+                  {isPlaying ? (
+                    <Pause className="h-4 w-4 fill-white text-white" />
+                  ) : (
+                    <Play className="h-4 w-4 fill-white text-white ml-0.5" />
+                  )}
+                </div>
+              </button>
+
+              {/* Prev Button */}
+              <button
+                onClick={() => {
+                  setCurrentSlide(
+                    (prev) => (prev - 1 + SPECIAL_CAROUSEL_SLIDES.length) % SPECIAL_CAROUSEL_SLIDES.length
+                  );
+                  setProgress(0);
+                }}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              {/* Next Button */}
+              <button
+                onClick={() => {
+                  setCurrentSlide((prev) => (prev + 1) % SPECIAL_CAROUSEL_SLIDES.length);
+                  setProgress(0);
+                }}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
           </div>
         </div>
@@ -594,141 +726,44 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── SPECIAL AUTOPLAY HERO CAROUSEL SECTION ── */}
+      {/* ── HERO BANNER VIDEO SECTION ── */}
       <section className="w-full relative mt-16 sm:mt-24 select-none">
-        <div className="relative w-full aspect-[3/4] sm:aspect-[21/9] md:aspect-[2.3/1] min-h-[520px] sm:min-h-[580px] md:min-h-[640px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
+        <div className="relative w-full aspect-[3/4] sm:aspect-[21/9] md:aspect-[2.3/1] min-h-[500px] sm:min-h-[440px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/20 z-10" />
+          {/* Full-screen background video */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover object-center select-none"
+          >
+            <source src="/videos/gym.mp4" type="video/mp4" />
+          </video>
           
-          {/* Slides */}
-          {SPECIAL_CAROUSEL_SLIDES.map((slide, index) => {
-            const active = index === currentSlide;
-            return (
-              <div
-                key={index}
-                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-                  active ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-                }`}
+          <div className="relative z-20 mx-auto w-full max-w-[1920px] px-4 sm:px-6 md:px-12 lg:px-16 pb-10 sm:pb-12 md:pb-20 text-white">
+            <span className="text-[11px] sm:text-xs md:text-sm font-black tracking-widest text-[#f5f5f5] uppercase mb-2 sm:mb-3 block">
+              Just Released
+            </span>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-3 sm:mb-6 max-w-4xl drop-shadow-sm">
+              {settings.hero_title || "WIN ON YOUR TERMS"}
+            </h1>
+            <p className="text-xs sm:text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-6 sm:mb-8 font-medium drop-shadow-sm line-clamp-3 sm:line-clamp-none">
+              {settings.hero_subtitle || "Step into limitlessness with our brand new seasonal collections. Engineered with lightweight, premium fabrics designed for peak movement and performance."}
+            </p>
+            <div className="flex flex-wrap gap-3 sm:gap-4">
+              <Link
+                href="/shop"
+                className="rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase border border-white"
               >
-                {/* Background Image */}
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="absolute inset-0 w-full h-full object-cover object-center select-none"
-                />
-                
-                {/* Dark overlay for readability */}
-                <div className="absolute inset-0 bg-black/25" />
-
-                {/* Redirect whole slide to sports categories */}
-                <Link
-                  href="/shop?targetGroup=SPORTS"
-                  className="absolute inset-0 z-20 cursor-pointer"
-                  aria-label={`Shop ${slide.title}`}
-                />
-                
-                {/* Slide content */}
-                <div className="relative z-25 mx-auto w-full h-full flex flex-col justify-end pb-16 md:pb-24 text-white px-6 md:px-12 lg:px-16 pointer-events-none">
-                  <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase select-none leading-none mb-6 max-w-4xl drop-shadow-sm animate-fade-in" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
-                    {slide.title}
-                  </h2>
-                  <p className="text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-8 font-medium drop-shadow-sm">
-                    {slide.subtitle}
-                  </p>
-                  <div>
-                    <div
-                      className="inline-block rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-3 px-8 text-xs font-bold tracking-wider uppercase border border-white"
-                    >
-                      Shop
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Controls overlay in the bottom right and dots in the bottom center */}
-          <div className="absolute bottom-6 left-0 right-0 z-30 flex items-center justify-between px-8 md:px-16 pointer-events-none">
-            {/* Center dots indicators */}
-            <div className="flex-1 flex justify-center gap-2 pointer-events-auto">
-              {SPECIAL_CAROUSEL_SLIDES.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setCurrentSlide(index);
-                    setProgress(0);
-                  }}
-                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    index === currentSlide ? "w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
-
-            {/* Bottom-right Controls */}
-            <div className="flex items-center gap-3 pointer-events-auto">
-              {/* Play/Pause Button with Circular Progress Ring */}
-              <button
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="w-11 h-11 relative flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-all cursor-pointer backdrop-blur-sm"
-                aria-label={isPlaying ? "Pause autoplay" : "Start autoplay"}
+                Shop Collection
+              </Link>
+              <Link
+                href="/shop?targetGroup=MEN"
+                className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase border-2 border-white"
               >
-                {/* SVG Progress Ring */}
-                <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 44 44">
-                  {/* Background Track */}
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r="18"
-                    className="stroke-white/20 fill-none"
-                    strokeWidth="2.5"
-                  />
-                  {/* Active Progress Path */}
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r="18"
-                    className="stroke-white fill-none transition-all duration-75"
-                    strokeWidth="2.5"
-                    strokeDasharray="113.1"
-                    strokeDashoffset={113.1 - (progress / 100) * 113.1}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                {/* Icon (centered on top) */}
-                <div className="relative z-10 flex items-center justify-center">
-                  {isPlaying ? (
-                    <Pause className="h-4 w-4 fill-white text-white" />
-                  ) : (
-                    <Play className="h-4 w-4 fill-white text-white ml-0.5" />
-                  )}
-                </div>
-              </button>
-
-              {/* Prev Button */}
-              <button
-                onClick={() => {
-                  setCurrentSlide(
-                    (prev) => (prev - 1 + SPECIAL_CAROUSEL_SLIDES.length) % SPECIAL_CAROUSEL_SLIDES.length
-                  );
-                  setProgress(0);
-                }}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
-                aria-label="Previous slide"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-
-              {/* Next Button */}
-              <button
-                onClick={() => {
-                  setCurrentSlide((prev) => (prev + 1) % SPECIAL_CAROUSEL_SLIDES.length);
-                  setProgress(0);
-                }}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
-                aria-label="Next slide"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
+                Shop Men&#39;s
+              </Link>
             </div>
           </div>
         </div>
