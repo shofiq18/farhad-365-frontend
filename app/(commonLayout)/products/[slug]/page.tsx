@@ -44,6 +44,17 @@ export default function ProductDetailsPage() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState<string>("");
   const [sizeError, setSizeError] = useState(false);
+
+  // Zoom on hover state
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const [isImageHovered, setIsImageHovered] = useState(false);
+
+  const handleImageMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomPos({ x, y });
+  };
   
   // Accordion state
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
@@ -302,12 +313,21 @@ export default function ProductDetailsPage() {
             </div>
 
             {/* Main Image */}
-            <div className="flex-1 bg-gray-50 aspect-square overflow-hidden relative border border-gray-100 max-h-[600px] flex items-center justify-center">
+            <div 
+              className="flex-1 bg-gray-50 aspect-square overflow-hidden relative border border-gray-100 max-h-[600px] flex items-center justify-center cursor-zoom-in group select-none"
+              onMouseEnter={() => setIsImageHovered(true)}
+              onMouseLeave={() => setIsImageHovered(false)}
+              onMouseMove={handleImageMouseMove}
+            >
               {activeImage ? (
                 <img
                   src={activeImage}
                   alt={product.title}
-                  className="w-full h-full object-cover object-top transition duration-300 hover:scale-105"
+                  className="w-full h-full object-cover object-top transition-transform duration-150 ease-out pointer-events-none"
+                  style={{
+                    transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                    transform: isImageHovered ? "scale(2.2)" : "scale(1)",
+                  }}
                 />
               ) : (
                 <div className="text-gray-300 text-sm">No Image Available</div>
@@ -315,7 +335,7 @@ export default function ProductDetailsPage() {
 
               {/* Discount Tag */}
               {product.discount > 0 && (
-                <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-black px-3 py-1">
+                <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-black px-3 py-1 pointer-events-none z-10">
                   {product.discount}% OFF
                 </div>
               )}

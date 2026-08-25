@@ -520,61 +520,75 @@ export default function ShopPage() {
             </div>
           ) : (
             <>
-              {/* Product Grid: Responsive column scaling for mobile, laptop (1024px), desktop (1440px), and ultra-wide/4K (1920px - 2560px) */}
+              {/* Product Grid: Nike-style 3-column grid for desktop/laptop and 2-column grid for mobile */}
               <div
-                className={`grid gap-x-2 sm:gap-x-6 gap-y-6 sm:gap-y-10 ${
-                  showFilters
-                    ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4"
-                    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
-                }`}
+                className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-x-3 sm:gap-x-6 gap-y-6 sm:gap-y-10"
               >
                 {productsData?.data?.map((product: any) => {
                   const discountedPrice =
                     product.discount > 0
                       ? product.price * (1 - product.discount / 100)
                       : null;
+
+                  const subtitle = product.targetGroup && product.category?.name
+                    ? `${product.targetGroup.charAt(0) + product.targetGroup.slice(1).toLowerCase()}'s ${product.category.name}`
+                    : product.category?.name || "Sportswear";
+
                   return (
                     <Link
                       key={product.id}
                       href={`/products/${product.slug}`}
-                      className="group flex flex-col"
+                      className="group flex flex-col cursor-pointer"
                     >
-                      {/* Product Image: Responsive 4:5 aspect ratio for perfectly proportioned cards on 1024px, 1440px, and 4K viewports */}
-                      <div className="w-full aspect-[4/5] overflow-hidden mb-2 sm:mb-3 flex-shrink-0 bg-gray-100">
+                      {/* Product Image: Nike aspect-square with #f6f6f6 bg */}
+                      <div className="w-full aspect-square overflow-hidden mb-1.5 flex-shrink-0 bg-[#f6f6f6] cursor-pointer relative flex items-center justify-center">
                         {product.images?.[0] ? (
                           <img
                             src={product.images[0]}
                             alt={product.title}
-                            className="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
+                            className="w-full h-full object-cover object-top cursor-pointer"
                           />
                         ) : (
-                          <div className="w-full h-full bg-gray-200" />
+                          <div className="w-full h-full bg-[#f6f6f6]" />
                         )}
                       </div>
 
-                      {/* Product Info */}
-                      <div className="flex flex-col gap-0.5 px-2 sm:px-0">
-                        <p className="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                          {product.category?.name}
-                        </p>
-                        <p className="text-xs sm:text-sm font-bold text-black leading-snug group-hover:underline line-clamp-2">
+                      {/* Nike Colorway Swatches Bar */}
+                      {product.images && product.images.length > 1 && (
+                        <div className="flex items-center gap-1.5 overflow-x-auto py-1 mb-1 scrollbar-none min-h-[32px]">
+                          {product.images.slice(0, 8).map((img: string, idx: number) => (
+                            <div
+                              key={idx}
+                              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-sm bg-[#f6f6f6] border overflow-hidden shrink-0 transition cursor-pointer ${
+                                idx === 0 ? "border-black" : "border-gray-200 hover:border-gray-400"
+                              }`}
+                            >
+                              <img src={img} alt="" className="w-full h-full object-cover" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Product Info - Nike exact hierarchy: Title -> Subtitle -> Price */}
+                      <div className="flex flex-col px-0.5 mt-0.5">
+                        <h3 className="text-sm sm:text-[15px] font-semibold text-[#111111] leading-tight truncate">
                           {product.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm font-normal text-[#757575] mt-0.5 truncate">
+                          {subtitle}
                         </p>
-                        <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
+                        <div className="flex items-center gap-2 mt-1 sm:mt-1.5">
                           {discountedPrice ? (
                             <>
-                              <span className="text-xs sm:text-sm font-bold text-black">
+                              <span className="text-sm sm:text-[15px] font-semibold text-[#111111]">
                                 ৳{discountedPrice.toLocaleString()}
                               </span>
-                              <span className="text-[11px] sm:text-sm text-gray-400 line-through">
+                              <span className="text-xs sm:text-sm text-[#757575] line-through">
                                 ৳{product.price.toLocaleString()}
-                              </span>
-                              <span className="text-[10px] sm:text-xs font-bold text-red-600">
-                                {product.discount}% OFF
                               </span>
                             </>
                           ) : (
-                            <span className="text-xs sm:text-sm font-bold text-black">
+                            <span className="text-sm sm:text-[15px] font-semibold text-[#111111]">
                               ৳{product.price.toLocaleString()}
                             </span>
                           )}

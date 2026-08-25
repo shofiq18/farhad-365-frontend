@@ -53,7 +53,7 @@ const STATIC_TRENDING_FALLBACKS = [
 
 const SPECIAL_CAROUSEL_SLIDES = [
   {
-    image: "/corousal2.webp",
+    image: "/corousal2.avif",
     tag: "JUST RELEASED",
     title: "WIN ON YOUR TERMS",
     subtitle: "Step into limitlessness with our brand new seasonal collections. Engineered with lightweight, premium fabrics designed for peak movement and performance.",
@@ -77,8 +77,8 @@ const SPECIAL_CAROUSEL_SLIDES = [
     tag: "WOMEN'S COLLECTION",
     title: "ELEVATE YOUR WORKOUT",
     subtitle: "Premium performance sportswear designed for maximum flexibility, breathability, and comfort.",
-    primaryBtnText: "Shop Women's",
-    primaryLink: "/shop?targetGroup=WOMEN",
+    primaryBtnText: "Shop Men's",
+    primaryLink: "/shop?targetGroup=MEN",
     secondaryBtnText: "View Collection",
     secondaryLink: "/shop",
   },
@@ -87,8 +87,8 @@ const SPECIAL_CAROUSEL_SLIDES = [
     tag: "PRO PERFORMANCE",
     title: "DOMINATE THE STAGE",
     subtitle: "Unmatched speed meets elite comfort. Push your boundaries and exceed your goals daily.",
-    primaryBtnText: "Shop Men's",
-    primaryLink: "/shop?targetGroup=MEN",
+    primaryBtnText: "Shop Women's",
+    primaryLink: "/shop?targetGroup=WOMEN",
     secondaryBtnText: "Shop All",
     secondaryLink: "/shop",
   },
@@ -291,7 +291,7 @@ export default function Home() {
             <img 
               src="/main-logo.jpg" 
               alt="Pristto Logo" 
-              className="h-9 lg:h-11 xl:h-12 w-auto object-contain select-none hover:scale-105 transition-transform duration-200" 
+              className="h-9 lg:h-11 xl:h-12 w-auto object-contain select-none cursor-pointer" 
             />
           </div>
 
@@ -346,29 +346,29 @@ export default function Home() {
                 />
                 
                 {/* Slide content */}
-                <div className="relative z-25 mx-auto w-full max-w-[1920px] h-full flex flex-col justify-end pb-12 sm:pb-16 md:pb-20 text-white px-4 sm:px-6 md:px-12 lg:px-16 pointer-events-none">
+                <div className="relative z-25 mx-auto w-full max-w-[1920px] h-full flex flex-col justify-end pb-16 sm:pb-16 md:pb-20 text-white px-4 sm:px-6 md:px-12 lg:px-16 pointer-events-none">
                   {slide.tag && (
-                    <span className="text-[11px] sm:text-xs md:text-sm font-black tracking-widest text-[#f5f5f5] uppercase mb-2 sm:mb-3 block drop-shadow-sm">
+                    <span className="text-[10px] sm:text-xs md:text-sm font-black tracking-widest text-[#f5f5f5] uppercase mb-1.5 sm:mb-3 block drop-shadow-sm">
                       {slide.tag}
                     </span>
                   )}
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-3 sm:mb-6 max-w-4xl drop-shadow-sm animate-fade-in" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+                  <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-2 sm:mb-6 max-w-4xl drop-shadow-sm animate-fade-in" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
                     {slide.title}
                   </h1>
-                  <p className="text-xs sm:text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-6 sm:mb-8 font-medium drop-shadow-sm line-clamp-3 sm:line-clamp-none">
+                  <p className="text-xs sm:text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-4 sm:mb-8 font-medium drop-shadow-sm line-clamp-2 sm:line-clamp-none">
                     {slide.subtitle}
                   </p>
-                  <div className="flex flex-wrap gap-3 sm:gap-4 pointer-events-auto">
+                  <div className="flex flex-wrap gap-2.5 sm:gap-4 pointer-events-auto">
                     <Link
                       href={slide.primaryLink || "/shop"}
-                      className="rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase border border-white cursor-pointer"
+                      className="rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-2.5 px-6 sm:py-3 sm:px-8 text-[11px] sm:text-xs font-bold tracking-wider uppercase border border-white cursor-pointer"
                     >
                       {slide.primaryBtnText || "Shop Collection"}
                     </Link>
                     {slide.secondaryBtnText && (
                       <Link
                         href={slide.secondaryLink || "/shop"}
-                        className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase border-2 border-white cursor-pointer"
+                        className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-2.5 px-6 sm:py-3 sm:px-8 text-[11px] sm:text-xs font-bold tracking-wider uppercase border-2 border-white cursor-pointer"
                       >
                         {slide.secondaryBtnText}
                       </Link>
@@ -379,10 +379,10 @@ export default function Home() {
             );
           })}
 
-          {/* Controls overlay in the bottom right and dots in the bottom center */}
-          <div className="absolute bottom-6 left-0 right-0 z-30 flex items-center justify-between px-8 md:px-16 pointer-events-none">
-            {/* Center dots indicators */}
-            <div className="flex-1 flex justify-center gap-2 pointer-events-auto">
+          {/* Controls overlay in the bottom right and dots on mobile/desktop */}
+          <div className="absolute bottom-3 sm:bottom-6 left-0 right-0 z-30 flex items-center justify-between px-4 sm:px-8 md:px-16 pointer-events-none">
+            {/* Dots indicators (Left on mobile, center on desktop) */}
+            <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto md:flex-1 md:justify-center">
               {SPECIAL_CAROUSEL_SLIDES.map((_, index) => (
                 <button
                   key={index}
@@ -391,7 +391,7 @@ export default function Home() {
                     setProgress(0);
                   }}
                   className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    index === currentSlide ? "w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
+                    index === currentSlide ? "w-5 sm:w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
                   }`}
                   aria-label={`Go to slide ${index + 1}`}
                 />
@@ -399,11 +399,11 @@ export default function Home() {
             </div>
 
             {/* Bottom-right Controls */}
-            <div className="flex items-center gap-3 pointer-events-auto">
+            <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
               {/* Play/Pause Button with Circular Progress Ring */}
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="w-11 h-11 relative flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-all cursor-pointer backdrop-blur-sm"
+                className="w-9 h-9 sm:w-11 sm:h-11 relative flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-all cursor-pointer backdrop-blur-sm"
                 aria-label={isPlaying ? "Pause autoplay" : "Start autoplay"}
               >
                 {/* SVG Progress Ring */}
@@ -431,9 +431,9 @@ export default function Home() {
                 {/* Icon (centered on top) */}
                 <div className="relative z-10 flex items-center justify-center">
                   {isPlaying ? (
-                    <Pause className="h-4 w-4 fill-white text-white" />
+                    <Pause className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white text-white" />
                   ) : (
-                    <Play className="h-4 w-4 fill-white text-white ml-0.5" />
+                    <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white text-white ml-0.5" />
                   )}
                 </div>
               </button>
@@ -446,10 +446,10 @@ export default function Home() {
                   );
                   setProgress(0);
                 }}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
+                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
                 aria-label="Previous slide"
               >
-                <ChevronLeft className="h-5 w-5" />
+                <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
 
               {/* Next Button */}
@@ -458,10 +458,10 @@ export default function Home() {
                   setCurrentSlide((prev) => (prev + 1) % SPECIAL_CAROUSEL_SLIDES.length);
                   setProgress(0);
                 }}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
+                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
                 aria-label="Next slide"
               >
-                <ChevronRight className="h-5 w-5" />
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
           </div>
@@ -494,7 +494,7 @@ export default function Home() {
                 <img
                   src={cat.image}
                   alt={cat.name}
-                  className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
+                  className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 sm:hidden" />
@@ -537,22 +537,26 @@ export default function Home() {
                   ? product.price * (1 - product.discount / 100)
                   : null;
 
+              const subtitle = product.targetGroup && product.category?.name
+                ? `${product.targetGroup.charAt(0) + product.targetGroup.slice(1).toLowerCase()}'s ${product.category.name}`
+                : product.category?.name || "Sportswear";
+
               return (
                 <div 
                   key={product.id}
                   className="w-full group flex flex-col relative cursor-pointer"
                 >
-                  {/* Image container */}
-                  <div className="relative w-full aspect-[4/5] bg-gray-100 overflow-hidden mb-2 sm:mb-4 border border-zinc-100 cursor-pointer">
+                  {/* Image container: Nike aspect-square with #f6f6f6 bg */}
+                  <div className="relative w-full aspect-square bg-[#f6f6f6] overflow-hidden mb-2 sm:mb-3 cursor-pointer flex items-center justify-center">
                     {product.images?.[0] ? (
                       <img
                         src={product.images[0]}
                         alt={product.title}
-                        className="w-full h-full object-cover object-top select-none cursor-pointer group-hover:scale-105 transition duration-500"
+                        className="w-full h-full object-cover object-center select-none cursor-pointer"
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full bg-zinc-200 flex items-center justify-center text-zinc-400 text-xs">
+                      <div className="w-full h-full bg-[#f6f6f6] flex items-center justify-center text-zinc-400 text-xs">
                         No Image
                       </div>
                     )}
@@ -561,30 +565,30 @@ export default function Home() {
                     <Link href={`/products/${product.slug}`} className="absolute inset-0 z-10 cursor-pointer" aria-label={product.title} />
                   </div>
 
-                  {/* Info */}
-                  <div className="flex flex-col px-2 sm:px-0">
-                    <p className="text-[10px] sm:text-[11px] font-semibold text-gray-400 tracking-wider">
-                      {product.category?.name || "Sportswear"}
-                    </p>
+                  {/* Nike Info Hierarchy: Title -> Subtitle -> Price */}
+                  <div className="flex flex-col px-0.5">
                     <Link 
                       href={`/products/${product.slug}`}
-                      className="text-xs sm:text-[15px] font-medium text-black truncate mt-0.5 cursor-pointer"
+                      className="text-sm sm:text-[15px] font-semibold text-[#111111] truncate cursor-pointer leading-tight"
                     >
                       {product.title}
                     </Link>
+                    <p className="text-xs sm:text-sm font-normal text-[#757575] mt-0.5 truncate">
+                      {subtitle}
+                    </p>
                     
                     <div className="flex items-center gap-2 mt-1 sm:mt-1.5">
                       {discountedPrice ? (
                         <>
-                          <span className="text-xs sm:text-sm font-bold text-black">
+                          <span className="text-sm sm:text-[15px] font-semibold text-[#111111]">
                             ৳{discountedPrice.toLocaleString()}
                           </span>
-                          <span className="text-[11px] sm:text-xs text-gray-400 line-through">
+                          <span className="text-xs sm:text-sm text-[#757575] line-through">
                             ৳{product.price.toLocaleString()}
                           </span>
                         </>
                       ) : (
-                        <span className="text-xs sm:text-sm font-bold text-black">
+                        <span className="text-sm sm:text-[15px] font-semibold text-[#111111]">
                           ৳{product.price.toLocaleString()}
                         </span>
                       )}
@@ -648,7 +652,7 @@ export default function Home() {
               <img
                 src="/run free.avif"
                 alt="Jordan Kids"
-                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
+                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
                 loading="lazy"
               />
               <Link href="/shop?category=shoes" className="absolute inset-0 z-20 cursor-pointer" />
@@ -675,7 +679,7 @@ export default function Home() {
               <img
                 src="/men.jpg"
                 alt="Streetwear style campaign"
-                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
+                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
                 loading="lazy"
               />
               <Link href="/shop?targetGroup=UNISEX" className="absolute inset-0 z-20 cursor-pointer" />
@@ -702,7 +706,7 @@ export default function Home() {
               <img
                 src="/featured.avif"
                 alt="Jordan Kids"
-                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
+                className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
                 loading="lazy"
               />
               <Link href="/shop?category=clothing" className="absolute inset-0 z-20 cursor-pointer" />
@@ -786,7 +790,7 @@ export default function Home() {
             <img
               src="/original.avif"
               alt="Jordan Kids"
-              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
+              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10 cursor-pointer" />
@@ -809,7 +813,7 @@ export default function Home() {
             <img
               src="/original (1).avif"
               alt="Bags & Backpacks"
-              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
+              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10 cursor-pointer" />
@@ -832,7 +836,7 @@ export default function Home() {
             <img
               src="/original (2).avif"
               alt="Nike Kids"
-              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer group-hover:scale-105 transition duration-500"
+              className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10 cursor-pointer" />
@@ -876,7 +880,7 @@ export default function Home() {
                 <img
                   src={item.image || ""}
                   alt={item.name}
-                  className="max-h-14 sm:max-h-20 w-auto max-w-full object-contain select-none cursor-pointer group-hover:scale-105 transition duration-300"
+                  className="max-h-14 sm:max-h-20 w-auto max-w-full object-contain select-none cursor-pointer"
                   loading="lazy"
                 />
               </div>
