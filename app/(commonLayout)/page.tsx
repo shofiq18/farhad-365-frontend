@@ -146,12 +146,27 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [isPlaying, currentSlide]);
 
+  // Dynamically resolve hero slides from settings or fallback to default
+  const carouselSlides = (() => {
+    if (settings.hero_carousel_slides) {
+      try {
+        const parsed = JSON.parse(settings.hero_carousel_slides);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (err) {
+        console.error("Failed to parse hero_carousel_slides setting:", err);
+      }
+    }
+    return SPECIAL_CAROUSEL_SLIDES;
+  })();
+
   useEffect(() => {
     if (progress >= 100) {
-      setCurrentSlide((prev) => (prev + 1) % SPECIAL_CAROUSEL_SLIDES.length);
+      setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
       setProgress(0);
     }
-  }, [progress]);
+  }, [progress, carouselSlides.length]);
 
   const rawCategories = categoriesData?.data ?? [];
   const productsList = productsData?.data ?? [];
@@ -316,158 +331,207 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── SPECIAL AUTOPLAY HERO CAROUSEL SECTION ── */}
+      {/* ── DYNAMIC DUAL-MODE HERO SECTION (CAROUSEL VS VIDEO) ── */}
       <section className="w-full relative select-none">
-        <div className="relative w-full aspect-[3/4] sm:aspect-[21/9] md:aspect-[2.3/1] min-h-[520px] sm:min-h-[580px] md:min-h-[640px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
-          
-          {/* Slides */}
-          {SPECIAL_CAROUSEL_SLIDES.map((slide, index) => {
-            const active = index === currentSlide;
-            return (
-              <div
-                key={index}
-                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-                  active ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-                }`}
-              >
-                {/* Background Image */}
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="absolute inset-0 w-full h-full object-cover object-center select-none"
-                />
-                
-                {/* Dark overlay for readability */}
-                <div className="absolute inset-0 bg-black/25" />
+        {settings.hero_mode === "VIDEO" ? (
+          /* Video Showcase Hero Banner */
+          <div className="relative w-full aspect-[3/4] sm:aspect-[21/9] md:aspect-[2.3/1] min-h-[520px] sm:min-h-[580px] md:min-h-[640px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
+            <video
+              key={settings.hero_video_url || "/videos/gym.mp4"}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover object-top select-none"
+            >
+              <source src={settings.hero_video_url || "/videos/gym.mp4"} type="video/mp4" />
+            </video>
+            {/* Light, subtle gradient overlay for text legibility */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent z-10" />
 
-                {/* Redirect whole slide overlay */}
+            {/* Video Hero Overlay Text */}
+            <div className="relative z-20 mx-auto w-full max-w-[1920px] px-4 sm:px-6 md:px-12 lg:px-16 pb-16 sm:pb-20 text-white">
+              {settings.hero_video_tag && (
+                <span className="text-[10px] sm:text-xs md:text-sm font-black tracking-widest text-[#f5f5f5] uppercase mb-1.5 sm:mb-3 block drop-shadow-sm">
+                  {settings.hero_video_tag}
+                </span>
+              )}
+              <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-2 sm:mb-6 max-w-4xl drop-shadow-sm" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+                {settings.hero_video_title || "WIN ON YOUR TERMS"}
+              </h1>
+              <p className="text-xs sm:text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-4 sm:mb-8 font-medium drop-shadow-sm line-clamp-3 sm:line-clamp-none">
+                {settings.hero_video_subtitle || "Step into limitlessness with our brand new seasonal collections."}
+              </p>
+              <div className="flex flex-wrap gap-2.5 sm:gap-4">
                 <Link
-                  href={slide.primaryLink || "/shop"}
-                  className="absolute inset-0 z-20 cursor-pointer"
-                  aria-label={`Shop ${slide.title}`}
-                />
-                
-                {/* Slide content */}
-                <div className="relative z-25 mx-auto w-full max-w-[1920px] h-full flex flex-col justify-end pb-16 sm:pb-16 md:pb-20 text-white px-4 sm:px-6 md:px-12 lg:px-16 pointer-events-none">
-                  {slide.tag && (
-                    <span className="text-[10px] sm:text-xs md:text-sm font-black tracking-widest text-[#f5f5f5] uppercase mb-1.5 sm:mb-3 block drop-shadow-sm">
-                      {slide.tag}
-                    </span>
-                  )}
-                  <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-2 sm:mb-6 max-w-4xl drop-shadow-sm animate-fade-in" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
-                    {slide.title}
-                  </h1>
-                  <p className="text-xs sm:text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-4 sm:mb-8 font-medium drop-shadow-sm line-clamp-2 sm:line-clamp-none">
-                    {slide.subtitle}
-                  </p>
-                  <div className="flex flex-wrap gap-2.5 sm:gap-4 pointer-events-auto">
-                    <Link
-                      href={slide.primaryLink || "/shop"}
-                      className="rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-2.5 px-6 sm:py-3 sm:px-8 text-[11px] sm:text-xs font-bold tracking-wider uppercase border border-white cursor-pointer"
-                    >
-                      {slide.primaryBtnText || "Shop Collection"}
-                    </Link>
-                    {slide.secondaryBtnText && (
-                      <Link
-                        href={slide.secondaryLink || "/shop"}
-                        className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-2.5 px-6 sm:py-3 sm:px-8 text-[11px] sm:text-xs font-bold tracking-wider uppercase border-2 border-white cursor-pointer"
-                      >
-                        {slide.secondaryBtnText}
-                      </Link>
-                    )}
-                  </div>
-                </div>
+                  href={settings.hero_video_primary_btn_link || "/shop"}
+                  className="rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-2.5 px-6 sm:py-3 sm:px-8 text-[11px] sm:text-xs font-bold tracking-wider uppercase border border-white cursor-pointer"
+                >
+                  {settings.hero_video_primary_btn_text || "Shop Collection"}
+                </Link>
+                {settings.hero_video_secondary_btn_text && (
+                  <Link
+                    href={settings.hero_video_secondary_btn_link || "/shop"}
+                    className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-2.5 px-6 sm:py-3 sm:px-8 text-[11px] sm:text-xs font-bold tracking-wider uppercase border-2 border-white cursor-pointer"
+                  >
+                    {settings.hero_video_secondary_btn_text}
+                  </Link>
+                )}
               </div>
-            );
-          })}
-
-          {/* Controls overlay in the bottom right and dots on mobile/desktop */}
-          <div className="absolute bottom-3 sm:bottom-6 left-0 right-0 z-30 flex items-center justify-between px-4 sm:px-8 md:px-16 pointer-events-none">
-            {/* Dots indicators (Left on mobile, center on desktop) */}
-            <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto md:flex-1 md:justify-center">
-              {SPECIAL_CAROUSEL_SLIDES.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setCurrentSlide(index);
-                    setProgress(0);
-                  }}
-                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    index === currentSlide ? "w-5 sm:w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
-
-            {/* Bottom-right Controls */}
-            <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
-              {/* Play/Pause Button with Circular Progress Ring */}
-              <button
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="w-9 h-9 sm:w-11 sm:h-11 relative flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-all cursor-pointer backdrop-blur-sm"
-                aria-label={isPlaying ? "Pause autoplay" : "Start autoplay"}
-              >
-                {/* SVG Progress Ring */}
-                <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 44 44">
-                  {/* Background Track */}
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r="18"
-                    className="stroke-white/20 fill-none"
-                    strokeWidth="2.5"
-                  />
-                  {/* Active Progress Path */}
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r="18"
-                    className="stroke-white fill-none transition-all duration-75"
-                    strokeWidth="2.5"
-                    strokeDasharray="113.1"
-                    strokeDashoffset={113.1 - (progress / 100) * 113.1}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                {/* Icon (centered on top) */}
-                <div className="relative z-10 flex items-center justify-center">
-                  {isPlaying ? (
-                    <Pause className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white text-white" />
-                  ) : (
-                    <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white text-white ml-0.5" />
-                  )}
-                </div>
-              </button>
-
-              {/* Prev Button */}
-              <button
-                onClick={() => {
-                  setCurrentSlide(
-                    (prev) => (prev - 1 + SPECIAL_CAROUSEL_SLIDES.length) % SPECIAL_CAROUSEL_SLIDES.length
-                  );
-                  setProgress(0);
-                }}
-                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
-                aria-label="Previous slide"
-              >
-                <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-              </button>
-
-              {/* Next Button */}
-              <button
-                onClick={() => {
-                  setCurrentSlide((prev) => (prev + 1) % SPECIAL_CAROUSEL_SLIDES.length);
-                  setProgress(0);
-                }}
-                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
-                aria-label="Next slide"
-              >
-                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-              </button>
             </div>
           </div>
-        </div>
+        ) : (
+          /* Carousel Slider Showcase Hero */
+          <div className="relative w-full aspect-[3/4] sm:aspect-[21/9] md:aspect-[2.3/1] min-h-[520px] sm:min-h-[580px] md:min-h-[640px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
+            {/* Slides */}
+            {carouselSlides.map((slide: any, index: number) => {
+              const active = index === currentSlide;
+              return (
+                <div
+                  key={slide.id || index}
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+                    active ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                  }`}
+                >
+                  {/* Background Image */}
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="absolute inset-0 w-full h-full object-cover object-top select-none"
+                  />
+                  
+                  {/* Dark overlay for readability */}
+                  <div className="absolute inset-0 bg-black/25" />
+
+                  {/* Redirect whole slide overlay */}
+                  <Link
+                    href={slide.primaryLink || "/shop"}
+                    className="absolute inset-0 z-20 cursor-pointer"
+                    aria-label={`Shop ${slide.title}`}
+                  />
+                  
+                  {/* Slide content */}
+                  <div className="relative z-25 mx-auto w-full max-w-[1920px] h-full flex flex-col justify-end pb-16 sm:pb-16 md:pb-20 text-white px-4 sm:px-6 md:px-12 lg:px-16 pointer-events-none">
+                    {slide.tag && (
+                      <span className="text-[10px] sm:text-xs md:text-sm font-black tracking-widest text-[#f5f5f5] uppercase mb-1.5 sm:mb-3 block drop-shadow-sm">
+                        {slide.tag}
+                      </span>
+                    )}
+                    <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase select-none leading-none mb-2 sm:mb-6 max-w-4xl drop-shadow-sm animate-fade-in" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+                      {slide.title}
+                    </h1>
+                    <p className="text-xs sm:text-sm md:text-base leading-relaxed text-zinc-100 max-w-xl mb-4 sm:mb-8 font-medium drop-shadow-sm line-clamp-2 sm:line-clamp-none">
+                      {slide.subtitle}
+                    </p>
+                    <div className="flex flex-wrap gap-2.5 sm:gap-4 pointer-events-auto">
+                      <Link
+                        href={slide.primaryLink || "/shop"}
+                        className="rounded-full bg-white text-black hover:bg-zinc-200 transition duration-300 py-2.5 px-6 sm:py-3 sm:px-8 text-[11px] sm:text-xs font-bold tracking-wider uppercase border border-white cursor-pointer"
+                      >
+                        {slide.primaryBtnText || "Shop Collection"}
+                      </Link>
+                      {slide.secondaryBtnText && (
+                        <Link
+                          href={slide.secondaryLink || "/shop"}
+                          className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-2.5 px-6 sm:py-3 sm:px-8 text-[11px] sm:text-xs font-bold tracking-wider uppercase border-2 border-white cursor-pointer"
+                        >
+                          {slide.secondaryBtnText}
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Controls overlay in the bottom right and dots on mobile/desktop */}
+            <div className="absolute bottom-3 sm:bottom-6 left-0 right-0 z-30 flex items-center justify-between px-4 sm:px-8 md:px-16 pointer-events-none">
+              {/* Dots indicators (Left on mobile, center on desktop) */}
+              <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto md:flex-1 md:justify-center">
+                {carouselSlides.map((_: any, index: number) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setCurrentSlide(index);
+                      setProgress(0);
+                    }}
+                    className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                      index === currentSlide ? "w-5 sm:w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+
+              {/* Bottom-right Controls */}
+              <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
+                {/* Play/Pause Button with Circular Progress Ring */}
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="w-9 h-9 sm:w-11 sm:h-11 relative flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-all cursor-pointer backdrop-blur-sm"
+                  aria-label={isPlaying ? "Pause autoplay" : "Start autoplay"}
+                >
+                  {/* SVG Progress Ring */}
+                  <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 44 44">
+                    {/* Background Track */}
+                    <circle
+                      cx="22"
+                      cy="22"
+                      r="18"
+                      className="stroke-white/20 fill-none"
+                      strokeWidth="2.5"
+                    />
+                    {/* Active Progress Path */}
+                    <circle
+                      cx="22"
+                      cy="22"
+                      r="18"
+                      className="stroke-white fill-none transition-all duration-75"
+                      strokeWidth="2.5"
+                      strokeDasharray="113.1"
+                      strokeDashoffset={113.1 - (progress / 100) * 113.1}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  {/* Icon (centered on top) */}
+                  <div className="relative z-10 flex items-center justify-center">
+                    {isPlaying ? (
+                      <Pause className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white text-white" />
+                    ) : (
+                      <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white text-white ml-0.5" />
+                    )}
+                  </div>
+                </button>
+
+                {/* Prev Button */}
+                <button
+                  onClick={() => {
+                    setCurrentSlide(
+                      (prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length
+                    );
+                    setProgress(0);
+                  }}
+                  className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
+                  aria-label="Previous slide"
+                >
+                  <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                </button>
+
+                {/* Next Button */}
+                <button
+                  onClick={() => {
+                    setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
+                    setProgress(0);
+                  }}
+                  className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
+                  aria-label="Next slide"
+                >
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* ── EXACT NIKE STYLE CATEGORY GRID (BEST IN CLASS) ── */}
@@ -614,8 +678,8 @@ export default function Home() {
         >
           <source src="/videos/running.mp4" type="video/mp4" />
         </video>
-        {/* Subtle gradient overlay — heavier at bottom for text legibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent z-10" />
+        {/* Subtle gradient overlay — clear & bright video background */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent z-10" />
         {/* Left-aligned editorial text overlay */}
         <div className="absolute inset-0 z-20 flex flex-col justify-end px-6 sm:px-8 md:px-16 lg:px-24 pb-10 sm:pb-14 md:pb-20 text-white">
           <span className="text-[10px] sm:text-xs font-black tracking-[0.3em] uppercase text-zinc-300 mb-2 sm:mb-3 block">
@@ -735,7 +799,7 @@ export default function Home() {
       {/* ── HERO BANNER VIDEO SECTION ── */}
       <section className="w-full relative mt-16 sm:mt-24 select-none">
         <div className="relative w-full aspect-[3/4] sm:aspect-[21/9] md:aspect-[2.3/1] min-h-[500px] sm:min-h-[440px] overflow-hidden bg-zinc-950 flex flex-col justify-end">
-          <div className="absolute inset-0 bg-black/20 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent z-10" />
           {/* Full-screen background video */}
           <video
             autoPlay
