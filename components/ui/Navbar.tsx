@@ -270,18 +270,18 @@ export default function Navbar() {
             <span className="h-3.5 w-[1px] bg-gray-300" />
             <Link href="/help" className="hover:text-gray-500">Help</Link>
             <span className="h-3.5 w-[1px] bg-gray-300" />
+            <Link href="/sign-up" className="hover:text-gray-500">Join Us</Link>
+            <span className="h-3.5 w-[1px] bg-gray-300" />
+            <Link href="/profile?tab=tracker" className="hover:text-gray-500">Track Your Order</Link>
+            <span className="h-3.5 w-[1px] bg-gray-300" />
             {user ? (
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-3.5">
                 <span>Hi, {user.name ? user.name.split(" ")[0] : (user.email ? user.email.split("@")[0] : "User")}</span>
-                <span className="h-3.5 w-[1px] bg-gray-300 ml-1.5" />
+                <span className="h-3.5 w-[1px] bg-gray-300" />
                 <button onClick={handleLogout} className="hover:text-red-600 cursor-pointer">Sign Out</button>
               </div>
             ) : (
-              <div className="flex items-center space-x-3.5">
-                <Link href="/sign-up" className="hover:text-gray-500">Join Us</Link>
-                <span className="h-3.5 w-[1px] bg-gray-300" />
-                <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="hover:text-gray-500">Sign In</Link>
-              </div>
+              <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="hover:text-gray-500">Sign In</Link>
             )}
           </div>
         </div>
