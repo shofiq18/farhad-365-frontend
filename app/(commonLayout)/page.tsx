@@ -52,6 +52,26 @@ const STATIC_TRENDING_FALLBACKS = [
 ];
 
 const SPECIAL_CAROUSEL_SLIDES = [
+   {
+    image: "/corousal3.webp",
+    tag: "WOMEN'S COLLECTION",
+    title: "ELEVATE YOUR WORKOUT",
+    subtitle: "Premium performance sportswear designed for maximum flexibility, breathability, and comfort.",
+    primaryBtnText: "Shop Men's",
+    primaryLink: "/shop?targetGroup=MEN",
+    secondaryBtnText: "View Collection",
+    secondaryLink: "/shop",
+  },
+   {
+    image: "/corousal4.webp",
+    tag: "PRO PERFORMANCE",
+    title: "DOMINATE THE STAGE",
+    subtitle: "Unmatched speed meets elite comfort. Push your boundaries and exceed your goals daily.",
+    primaryBtnText: "Shop Women's",
+    primaryLink: "/shop?targetGroup=WOMEN",
+    secondaryBtnText: "Shop All",
+    secondaryLink: "/shop",
+  },
   {
     image: "/corousal2.avif",
     tag: "JUST RELEASED",
@@ -59,8 +79,8 @@ const SPECIAL_CAROUSEL_SLIDES = [
     subtitle: "Step into limitlessness with our brand new seasonal collections. Engineered with lightweight, premium fabrics designed for peak movement and performance.",
     primaryBtnText: "Shop Collection",
     primaryLink: "/shop",
-    secondaryBtnText: "Shop Men's",
-    secondaryLink: "/shop?targetGroup=MEN",
+    secondaryBtnText: "Shop Accessories",
+    secondaryLink: "/shop?category=accessories",
   },
   {
     image: "/corousal1.webp",
@@ -72,26 +92,8 @@ const SPECIAL_CAROUSEL_SLIDES = [
     secondaryBtnText: "Explore Running",
     secondaryLink: "/shop?targetGroup=SPORTS",
   },
-  {
-    image: "/corousal3.webp",
-    tag: "WOMEN'S COLLECTION",
-    title: "ELEVATE YOUR WORKOUT",
-    subtitle: "Premium performance sportswear designed for maximum flexibility, breathability, and comfort.",
-    primaryBtnText: "Shop Men's",
-    primaryLink: "/shop?targetGroup=MEN",
-    secondaryBtnText: "View Collection",
-    secondaryLink: "/shop",
-  },
-  {
-    image: "/corousal4.webp",
-    tag: "PRO PERFORMANCE",
-    title: "DOMINATE THE STAGE",
-    subtitle: "Unmatched speed meets elite comfort. Push your boundaries and exceed your goals daily.",
-    primaryBtnText: "Shop Women's",
-    primaryLink: "/shop?targetGroup=WOMEN",
-    secondaryBtnText: "Shop All",
-    secondaryLink: "/shop",
-  },
+ 
+ 
   {
     image: "/corousal6.webp",
     tag: "LUXURY FRAGRANCE",
@@ -768,6 +770,86 @@ export default function Home() {
               >
                 Shop Men&#39;s
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FRAGRANCE & TIMEPIECES SECTION ── */}
+      <section className="mx-auto max-w-[1920px] px-0 sm:px-6 md:px-12 lg:px-16 mt-16 sm:mt-24 md:mt-28">
+        <div className="text-center mb-8 sm:mb-12 select-none px-4 sm:px-0">
+          <h2 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter text-black uppercase leading-none" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+            FRAGRANCE & TIMEPIECES
+          </h2>
+          <p className="text-xs sm:text-sm font-semibold text-zinc-600 mt-2 sm:mt-4 max-w-2xl mx-auto leading-relaxed">
+            Iconic luxury fragrances and precision timepieces crafted to elevate your daily style.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Left Column: Tall Perfume Card (Responsive height scaling for laptop/desktop) */}
+          <div className="relative group overflow-hidden bg-zinc-900 aspect-[3/4] md:aspect-auto h-[480px] sm:h-[580px] md:h-[640px] lg:h-[720px] xl:h-[900px] 2xl:h-[1316px] cursor-pointer">
+            <img
+              src="/landing-purfume.avif"
+              alt="Shop Fragrance"
+              className="absolute inset-0 w-full h-full object-cover object-center select-none cursor-pointer"
+              loading="lazy"
+            />
+            {/* Softened black gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent z-10 cursor-pointer" />
+            
+            {/* Bottom-Left Title Overlay */}
+            <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8 z-20 pointer-events-none">
+              <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight drop-shadow-md block">
+                Shop Fragrance
+              </span>
+            </div>
+
+            <Link href="/shop?category=accessories" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Fragrance" />
+          </div>
+
+          {/* Right Column: 2 Stacked Watch Cards (Flex layout dynamically dividing left column height) */}
+          <div className="flex flex-col gap-4 h-full">
+            {/* Top Right Card: Watch 1 */}
+            <div className="relative group overflow-hidden bg-zinc-900 aspect-[16/9] sm:aspect-[2/1] md:aspect-auto flex-1 min-h-[220px] md:min-h-[300px] cursor-pointer">
+              <img
+                src="/landing-watch-1.jpg"
+                alt="Shop Timepieces"
+                className="absolute inset-0 w-full h-full object-cover object-center select-none cursor-pointer"
+                loading="lazy"
+              />
+              {/* Softened black gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent z-10 cursor-pointer" />
+              
+              {/* Bottom-Left Title Overlay */}
+              <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8 z-20 pointer-events-none">
+                <span className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight drop-shadow-md block">
+                  Shop Timepieces
+                </span>
+              </div>
+
+              <Link href="/shop?category=accessories" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Timepieces" />
+            </div>
+
+            {/* Bottom Right Card: Watch 2 */}
+            <div className="relative group overflow-hidden bg-zinc-900 aspect-[16/9] sm:aspect-[2/1] md:aspect-auto flex-1 min-h-[220px] md:min-h-[300px] cursor-pointer">
+              <img
+                src="/landing-watch-2.jpg"
+                alt="Shop Luxury Watches"
+                className="absolute inset-0 w-full h-full object-cover object-center select-none cursor-pointer"
+                loading="lazy"
+              />
+              {/* Softened black gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent z-10 cursor-pointer" />
+              
+              {/* Bottom-Left Title Overlay */}
+              <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8 z-20 pointer-events-none">
+                <span className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight drop-shadow-md block">
+                  Shop Luxury Watches
+                </span>
+              </div>
+
+              <Link href="/shop?category=accessories" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Luxury Watches" />
             </div>
           </div>
         </div>
