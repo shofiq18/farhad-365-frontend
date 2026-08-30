@@ -55,9 +55,9 @@ export default function Footer() {
           <div className="md:col-span-4 space-y-5">
             <Link href="/" className="inline-block">
               <img 
-                src="/main-logo.jpg" 
+                src="/main-logo.svg" 
                 alt="Pristto Logo" 
-                className="h-14 w-auto object-contain mx-auto mt-8 select-none" 
+                className="h-8 lg:h-10 xl:h-10 w-auto object-contain select-none invert" 
               />
             </Link>
             <p className="text-[13px] text-zinc-300 font-medium leading-relaxed max-w-sm">

@@ -439,253 +439,100 @@ function CheckoutForm() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+        <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-x-8 lg:gap-y-5 items-start">
           
-          {/* LEFT: Shipping Form (cols: 7) */}
-          <div className="lg:col-span-7 space-y-8">
-            <form onSubmit={handleSubmitOrder} className="space-y-6">
-              
-              {/* Shipping Address Header */}
+          {/* SECTION 1: Shipping Address (lg: cols 7) */}
+          <div className="lg:col-span-7 space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-black border-b border-gray-100 pb-3 flex items-center gap-2">
+                <Truck className="h-5 w-5 text-black" /> Shipping Address
+              </h2>
+            </div>
+
+            {/* Form Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-gray-700 mb-1">Street Address</label>
+                <input
+                  type="text"
+                  required
+                  value={street}
+                  onChange={(e) => setStreet(e.target.value)}
+                  placeholder="Area, House, Road details"
+                  className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-black placeholder-gray-400"
+                />
+              </div>
+
               <div>
-                <h2 className="text-lg font-bold text-black border-b border-gray-100 pb-3 flex items-center gap-2">
-                  <Truck className="h-5 w-5 text-black" /> Shipping Address
-                </h2>
+                <label className="block text-xs font-bold text-gray-700 mb-1">City / District</label>
+                <input
+                  type="text"
+                  required
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="e.g. Dhaka, Savar, Gazipur"
+                  className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-black placeholder-gray-400"
+                />
               </div>
 
-              {/* Form Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Street Address</label>
-                  <input
-                    type="text"
-                    required
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                    placeholder="Area, House, Road details"
-                    className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-black placeholder-gray-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">City / District</label>
-                  <input
-                    type="text"
-                    required
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="e.g. Dhaka, Savar, Gazipur"
-                    className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-black placeholder-gray-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Division</label>
-                  <select
-                    required
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    className="w-full border border-gray-200 p-3 text-sm bg-white focus:outline-none focus:border-black"
-                  >
-                    <option value="Dhaka">Dhaka</option>
-                    <option value="Chattogram">Chattogram</option>
-                    <option value="Sylhet">Sylhet</option>
-                    <option value="Khulna">Khulna</option>
-                    <option value="Barishal">Barishal</option>
-                    <option value="Rajshahi">Rajshahi</option>
-                    <option value="Rangpur">Rangpur</option>
-                    <option value="Mymensingh">Mymensingh</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Thana / Upazila (Optional)</label>
-                  <input
-                    type="text"
-                    value={thana}
-                    onChange={(e) => setThana(e.target.value)}
-                    placeholder="e.g. Mirpur, Uttara"
-                    className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-black placeholder-gray-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Zip / Postal Code</label>
-                  <input
-                    type="text"
-                    required
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    placeholder="1209"
-                    className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-black placeholder-gray-400"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Phone Number</label>
-                  <input
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="01712345678"
-                    className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-black placeholder-gray-400"
-                  />
-                </div>
-              </div>
-
-              {/* Payment Method Selector */}
-              {total > 0 && (
-                <div className="pt-6">
-                  <h2 className="text-lg font-bold text-black border-b border-gray-100 pb-3 mb-4 flex items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-black" /> Payment Method
-                  </h2>
-                  
-                  <div className="space-y-3.5">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                      {/* COD */}
-                      <label 
-                        className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
-                          paymentMethod === "COD" ? "border-black bg-gray-50" : "border-gray-200 hover:border-black"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          value="COD"
-                          checked={paymentMethod === "COD"}
-                          onChange={() => setPaymentMethod("COD")}
-                          className="mt-1 accent-black"
-                        />
-                        <div>
-                          <p className="text-sm font-bold text-black">Cash on Delivery</p>
-                          <p className="text-xs text-gray-500 mt-0.5">Pay in cash when your order is delivered.</p>
-                        </div>
-                      </label>
-
-                      {/* bKash */}
-                      <label 
-                        className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
-                          paymentMethod === "BKASH" ? "border-pink-600 bg-pink-50/40" : "border-gray-200 hover:border-black"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          value="BKASH"
-                          checked={paymentMethod === "BKASH"}
-                          onChange={() => setPaymentMethod("BKASH")}
-                          className="mt-1.5 accent-pink-600"
-                        />
-                        <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
-                          <div>
-                            <p className="text-sm font-bold text-black">Pay with bKash</p>
-                            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Send payment to our bKash number.</p>
-                          </div>
-                          <img 
-                            src="/bkash.png" 
-                            alt="bKash Logo" 
-                            className="h-8 object-contain shrink-0"
-                          />
-                        </div>
-                      </label>
-                    </div>
-
-                    {/* bKash Inline Details Expandable Section */}
-                    {paymentMethod === "BKASH" && (
-                      <div className="p-5 bg-gradient-to-br from-pink-50/80 to-rose-50 border border-pink-200 rounded-xl space-y-4 transition-all">
-                        <div className="flex items-center justify-between border-b border-pink-200/80 pb-3.5">
-                          <div>
-                            <span className="text-xs font-bold text-pink-700">Our bKash Account</span>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-base font-black text-pink-950 tracking-wider font-mono">
-                                {merchantBkashNumber}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={handleCopyBkashNumber}
-                                className="inline-flex items-center gap-1 bg-white hover:bg-pink-100 border border-pink-300 text-pink-700 text-xs font-bold px-2.5 py-1 rounded-full transition cursor-pointer"
-                              >
-                                {copiedBkash ? (
-                                  <>
-                                    <Check className="h-3.5 w-3.5 text-green-600" />
-                                    <span className="text-green-600">Copied!</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Copy className="h-3.5 w-3.5 text-pink-700" />
-                                    <span>Copy Number</span>
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-xs font-medium text-gray-500">Amount to Send</span>
-                            <p className="text-sm font-black text-pink-700">৳{total.toLocaleString()}</p>
-                          </div>
-                        </div>
-
-                        <p className="text-xs text-gray-600 leading-relaxed">
-                          Please Send Money / Pay <strong>৳{total.toLocaleString()}</strong> to the bKash number above. After completing the transaction, enter your sender number and Transaction ID (TrxID) below:
-                        </p>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                          <div>
-                            <label className="block text-xs font-bold text-gray-700 mb-1">
-                              Your bKash Number (Sender) <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="tel"
-                              required
-                              value={bkashSenderNumber}
-                              onChange={(e) => setBkashSenderNumber(e.target.value)}
-                              placeholder="017XXXXXXXX"
-                              className="w-full bg-white border border-pink-200 p-2.5 text-sm focus:outline-none focus:border-pink-600 focus:ring-1 focus:ring-pink-600 placeholder-gray-400 font-medium"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-bold text-gray-700 mb-1">
-                              Transaction ID (TrxID) <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              required
-                              value={bkashTrxId}
-                              onChange={(e) => setBkashTrxId(e.target.value)}
-                              placeholder="e.g. 9B7X2K4M1"
-                              className="w-full bg-white border border-pink-200 p-2.5 text-sm focus:outline-none focus:border-pink-600 focus:ring-1 focus:ring-pink-600 placeholder-gray-400 font-mono font-medium"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Submit Button */}
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  disabled={isPlacingOrder || !user}
-                  className="w-full flex items-center justify-center gap-2 rounded-full bg-black hover:bg-zinc-800 disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 text-sm transition cursor-pointer"
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Division</label>
+                <select
+                  required
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  className="w-full border border-gray-200 p-3 text-sm bg-white focus:outline-none focus:border-black"
                 >
-                  {isPlacingOrder ? (
-                    <>
-                      <Loader className="animate-spin h-4 w-4" /> Placing Order...
-                    </>
-                  ) : (
-                    "Place Order"
-                  )}
-                </button>
+                  <option value="Dhaka">Dhaka</option>
+                  <option value="Chattogram">Chattogram</option>
+                  <option value="Sylhet">Sylhet</option>
+                  <option value="Khulna">Khulna</option>
+                  <option value="Barishal">Barishal</option>
+                  <option value="Rajshahi">Rajshahi</option>
+                  <option value="Rangpur">Rangpur</option>
+                  <option value="Mymensingh">Mymensingh</option>
+                </select>
               </div>
 
-            </form>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Thana / Upazila (Optional)</label>
+                <input
+                  type="text"
+                  value={thana}
+                  onChange={(e) => setThana(e.target.value)}
+                  placeholder="e.g. Mirpur, Uttara"
+                  className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-black placeholder-gray-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Zip / Postal Code</label>
+                <input
+                  type="text"
+                  required
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value)}
+                  placeholder="1209"
+                  className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-black placeholder-gray-400"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-gray-700 mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="01712345678"
+                  className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-black placeholder-gray-400"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* RIGHT: Order Summary (cols: 5) */}
-          <div className="lg:col-span-5 bg-gray-50 border border-gray-100 p-6 md:p-8 sticky top-24">
+          {/* SECTION 2: Order Summary (Mobile: 2nd section after address; Desktop: Right cols 5) */}
+          <div className="lg:col-span-5 lg:row-span-2 bg-gray-50 border border-gray-100 p-6 md:p-8">
             <h2 className="text-lg font-bold text-black border-b border-gray-200 pb-3.5 mb-6">
               Summary
             </h2>
@@ -850,7 +697,159 @@ function CheckoutForm() {
             </div>
           </div>
 
-        </div>
+          {/* SECTION 3: Payment Method & Submit Button (lg: cols 7) */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* Payment Method Selector */}
+            {total > 0 && (
+              <div className="pt-2">
+                <h2 className="text-lg font-bold text-black border-b border-gray-100 pb-3 mb-4 flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-black" /> Payment Method
+                </h2>
+                
+                <div className="space-y-3.5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {/* COD */}
+                    <label 
+                      className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
+                        paymentMethod === "COD" ? "border-black bg-gray-50" : "border-gray-200 hover:border-black"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="COD"
+                        checked={paymentMethod === "COD"}
+                        onChange={() => setPaymentMethod("COD")}
+                        className="mt-1 accent-black"
+                      />
+                      <div>
+                        <p className="text-sm font-bold text-black">Cash on Delivery</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Pay in cash when your order is delivered.</p>
+                      </div>
+                    </label>
+
+                    {/* bKash */}
+                    <label 
+                      className={`flex items-start gap-3.5 border p-4 cursor-pointer transition ${
+                        paymentMethod === "BKASH" ? "border-pink-600 bg-pink-50/40" : "border-gray-200 hover:border-black"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="BKASH"
+                        checked={paymentMethod === "BKASH"}
+                        onChange={() => setPaymentMethod("BKASH")}
+                        className="mt-1.5 accent-pink-600"
+                      />
+                      <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
+                        <div>
+                          <p className="text-sm font-bold text-black">Pay with bKash</p>
+                          <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Send payment to our bKash number.</p>
+                        </div>
+                        <img 
+                          src="/bkash.png" 
+                          alt="bKash Logo" 
+                          className="h-8 object-contain shrink-0"
+                        />
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* bKash Inline Details Expandable Section */}
+                  {paymentMethod === "BKASH" && (
+                    <div className="p-5 bg-gradient-to-br from-pink-50/80 to-rose-50 border border-pink-200 rounded-xl space-y-4 transition-all">
+                      <div className="flex items-center justify-between border-b border-pink-200/80 pb-3.5">
+                        <div>
+                          <span className="text-xs font-bold text-pink-700">Our bKash Account</span>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-base font-black text-pink-950 tracking-wider font-mono">
+                              {merchantBkashNumber}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleCopyBkashNumber}
+                              className="inline-flex items-center gap-1 bg-white hover:bg-pink-100 border border-pink-300 text-pink-700 text-xs font-bold px-2.5 py-1 rounded-full transition cursor-pointer"
+                            >
+                              {copiedBkash ? (
+                                <>
+                                  <Check className="h-3.5 w-3.5 text-green-600" />
+                                  <span className="text-green-600">Copied!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="h-3.5 w-3.5 text-pink-700" />
+                                  <span>Copy Number</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs font-medium text-gray-500">Amount to Send</span>
+                          <p className="text-sm font-black text-pink-700">৳{total.toLocaleString()}</p>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-gray-600 leading-relaxed">
+                        Please Send Money / Pay <strong>৳{total.toLocaleString()}</strong> to the bKash number above. After completing the transaction, enter your sender number and Transaction ID (TrxID) below:
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Your bKash Number (Sender) <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="tel"
+                            required
+                            value={bkashSenderNumber}
+                            onChange={(e) => setBkashSenderNumber(e.target.value)}
+                            placeholder="017XXXXXXXX"
+                            className="w-full bg-white border border-pink-200 p-2.5 text-sm focus:outline-none focus:border-pink-600 focus:ring-1 focus:ring-pink-600 placeholder-gray-400 font-medium"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Transaction ID (TrxID) <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={bkashTrxId}
+                            onChange={(e) => setBkashTrxId(e.target.value)}
+                            placeholder="e.g. 9B7X2K4M1"
+                            className="w-full bg-white border border-pink-200 p-2.5 text-sm focus:outline-none focus:border-pink-600 focus:ring-1 focus:ring-pink-600 placeholder-gray-400 font-mono font-medium"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={isPlacingOrder || !user}
+                className="w-full flex items-center justify-center gap-2 rounded-full bg-black hover:bg-zinc-800 disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 text-sm transition cursor-pointer"
+              >
+                {isPlacingOrder ? (
+                  <>
+                    <Loader className="animate-spin h-4 w-4" /> Placing Order...
+                  </>
+                ) : (
+                  "Place Order"
+                )}
+              </button>
+            </div>
+          </div>
+
+        </form>
+
       </div>
     </div>
   );

@@ -522,7 +522,7 @@ export default function ShopPage() {
             <>
               {/* Product Grid: Nike-style 3-column grid for desktop/laptop and 2-column grid for mobile */}
               <div
-                className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-x-3 sm:gap-x-6 gap-y-6 sm:gap-y-10"
+                className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-x-2 sm:gap-x-6 gap-y-6 sm:gap-y-10"
               >
                 {productsData?.data?.map((product: any) => {
                   const discountedPrice =
@@ -553,9 +553,9 @@ export default function ShopPage() {
                         )}
                       </div>
 
-                      {/* Nike Colorway Swatches Bar */}
+                      {/* Nike Colorway Swatches Bar (px-2 on mobile only, flush md:px-0 on desktop) */}
                       {product.images && product.images.length > 1 && (
-                        <div className="flex items-center gap-1.5 overflow-x-auto py-1 mb-1 scrollbar-none min-h-[32px]">
+                        <div className="flex items-center gap-1.5 overflow-x-auto py-1 mb-1 px-2 md:px-0 scrollbar-none min-h-[32px]">
                           {product.images.slice(0, 8).map((img: string, idx: number) => (
                             <div
                               key={idx}
@@ -569,8 +569,8 @@ export default function ShopPage() {
                         </div>
                       )}
 
-                      {/* Product Info - Nike exact hierarchy: Title -> Subtitle -> Price */}
-                      <div className="flex flex-col px-0.5 mt-0.5">
+                      {/* Product Info - Nike exact hierarchy: Title -> Subtitle -> Price (px-2 on mobile only, flush md:px-0 on desktop) */}
+                      <div className="flex flex-col px-2 md:px-0 mt-0.5">
                         <h3 className="text-sm sm:text-[15px] font-semibold text-[#111111] leading-tight truncate">
                           {product.title}
                         </h3>

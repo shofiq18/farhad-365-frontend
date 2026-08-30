@@ -257,11 +257,11 @@ export default function Navbar() {
 
   return (
     <>
-      <div className={`sticky top-0 w-full transition-transform duration-300 z-50 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
+      <div className={`sticky top-0 w-full bg-white transition-transform duration-300 z-50 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
 
       {/* ── Top Bar ── */}
       <div className="hidden sm:block border-b border-gray-200 bg-[#f5f5f5] py-1.5 text-[11px] font-bold text-[#111111]">
-        <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16 flex justify-between items-center">
+        <div className="mx-auto max-w-[1920px] px-3 sm:px-6 md:px-12 lg:px-16 flex justify-between items-center">
           <div className="flex items-center space-x-3.5">
             {/* Left side spacer */}
           </div>
@@ -289,16 +289,16 @@ export default function Navbar() {
 
       {/* ── Main Nav ── */}
       <nav className="w-full border-b border-gray-200 bg-white relative">
-        <div className="mx-auto max-w-[1920px] px-6 md:px-12 lg:px-16">
-          <div className="flex h-16 justify-between items-center">
+        <div className="mx-auto max-w-[1920px] px-3 sm:px-6 md:px-12 lg:px-16">
+          <div className="flex h-16 sm:h-18 justify-between items-center">
 
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center group">
                 <img 
-                  src="/main-logo.jpg" 
+                  src="/main-logo.svg" 
                   alt="Pristto Logo" 
-                  className="h-14 w-auto object-contain transition duration-200 group-hover:scale-105 select-none invert" 
+                  className="h-8 lg:h-10 xl:h-10 w-auto object-contain transition duration-200 group-hover:scale-105 select-none mix-blend-multiply" 
                 />
               </Link>
             </div>
@@ -643,6 +643,79 @@ export default function Navbar() {
                 className="block rounded-lg px-3 py-2.5 text-base font-semibold text-gray-700 hover:bg-gray-50">
                 Sale
               </Link>
+
+              {/* ── Mobile Account / Authentication Section ── */}
+              <div className="pt-4 mt-4 border-t border-gray-100 space-y-3 px-1">
+                {user ? (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-xl mb-2">
+                      <div className="h-8 w-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs uppercase shrink-0">
+                        {user.name ? user.name.charAt(0) : (user.email ? user.email.charAt(0) : "U")}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-black truncate">
+                          Hi, {user.name ? user.name.split(" ")[0] : (user.email ? user.email.split("@")[0] : "User")}
+                        </p>
+                        <p className="text-[11px] text-gray-400 truncate">{user.email}</p>
+                      </div>
+                    </div>
+
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-bold text-gray-800 hover:bg-gray-50 transition"
+                    >
+                      <UserIcon className="h-4 w-4 text-black" /> My Account
+                    </Link>
+
+                    <Link
+                      href="/profile?tab=tracker"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-bold text-gray-800 hover:bg-gray-50 transition"
+                    >
+                      <Truck className="h-4 w-4 text-black" /> Track Your Order
+                    </Link>
+
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsOpen(false);
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50 transition cursor-pointer"
+                    >
+                      <LogOut className="h-4 w-4 text-red-600" /> Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3 pt-1">
+                    <div className="grid grid-cols-2 gap-2">
+                      <Link
+                        href={`/login?redirect=${encodeURIComponent(pathname)}`}
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center justify-center bg-black hover:bg-zinc-800 text-white font-bold py-2.5 px-4 rounded-full text-xs transition text-center"
+                      >
+                        Sign In
+                      </Link>
+
+                      <Link
+                        href="/sign-up"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center justify-center border border-black hover:bg-gray-50 text-black font-bold py-2.5 px-4 rounded-full text-xs transition text-center"
+                      >
+                        Join Us
+                      </Link>
+                    </div>
+
+                    <Link
+                      href="/profile?tab=tracker"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center justify-center gap-2 text-xs font-semibold text-gray-600 hover:text-black py-1 transition"
+                    >
+                      <Truck className="h-3.5 w-3.5" /> Track Your Order
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
