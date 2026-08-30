@@ -168,9 +168,9 @@ export default function SignUpForm() {
                 <div className="mb-6 text-center">
                   <Link href="/" className="inline-block mb-4">
                     <img
-                      src="/main-logo.jpg"
+                      src="/main-logo.svg"
                       alt="Pristto Logo"
-                      className="h-14 w-auto object-contain mx-auto select-none invert"
+                      className="h-8 lg:h-10 xl:h-10 w-auto object-contain mx-auto select-none mix-blend-multiply"
                     />
                   </Link>
                   <h1 className="text-3xl font-bold text-black">Create Account</h1>
@@ -371,9 +371,9 @@ export default function SignUpForm() {
                 <div className="mb-6 text-center flex flex-col items-center">
                   <Link href="/" className="inline-block mb-4">
                     <img
-                      src="/main-logo.jpg"
+                      src="/main-logo.svg"
                       alt="Pristto Logo"
-                      className="h-14 w-auto object-contain mx-auto select-none invert"
+                      className="h-8 lg:h-10 xl:h-10 w-auto object-contain mx-auto select-none mix-blend-multiply"
                     />
                   </Link>
                   <h1 className="text-3xl font-bold text-black text-center">Verify Your Email</h1>

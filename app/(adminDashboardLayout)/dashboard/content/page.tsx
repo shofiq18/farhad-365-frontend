@@ -47,6 +47,10 @@ const GENERAL_SETTING_LABELS: Record<string, { label: string; description: strin
   free_shipping_threshold: { label: "Free Shipping Threshold (৳)", description: "Minimum order amount to qualify for free shipping." },
   inside_dhaka_shipping: { label: "Inside Dhaka Delivery Charge (৳)", description: "Shipping cost for deliveries inside Dhaka area (default: 80)." },
   outside_dhaka_shipping: { label: "Outside Dhaka Delivery Charge (৳)", description: "Shipping cost for deliveries outside Dhaka area (default: 120)." },
+  promo_banner_title: { label: "Promo Banner Title", description: "Headline text shown on top marketing bar (e.g. BACK TO SCHOOL SALE)." },
+  promo_banner_offer: { label: "Promo Banner Offer", description: "Offer text shown on top marketing bar (e.g. EXTRA 25% OFF)." },
+  promo_banner_code: { label: "Promo Banner Coupon Code", description: "Coupon code shown on top marketing bar (e.g. DAYONE)." },
+  promo_banner_subtitle: { label: "Promo Banner Subtitle", description: "Subtitle shown under offer text (e.g. SELECT STYLES)." },
 };
 
 export default function ContentSettingsPage() {

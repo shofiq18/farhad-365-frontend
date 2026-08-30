@@ -87,7 +87,7 @@ export function DashboardSidebar() {
               alt="Logo"
               width={40}
               height={30}
-              className="h-9 w-auto object-contain select-none invert transition duration-200"
+              className="h-9 w-auto object-contain select-none transition duration-200"
             />
             <span className="ml-3 text-lg font-bold text-gray-800">
               Pristto

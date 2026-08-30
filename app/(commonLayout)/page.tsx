@@ -267,6 +267,12 @@ export default function Home() {
 
   const displayTrending = dynamicTrendingItems.length > 0 ? dynamicTrendingItems : STATIC_TRENDING_FALLBACKS;
 
+  // Dynamic Promo Marketing Banner Resolution
+  const promoTitle = settings.promo_banner_title || (activeDiscount ? `${activeDiscount.code} SALE` : "BACK TO SCHOOL SALE");
+  const promoOffer = settings.promo_banner_offer || (activeDiscount ? `EXTRA ${activeDiscount.type === "PERCENTAGE" ? `${activeDiscount.discountValue}%` : `৳${activeDiscount.discountValue}`} OFF` : "EXTRA 25% OFF");
+  const promoCode = settings.promo_banner_code || (activeDiscount ? activeDiscount.code : "DAYONE");
+  const promoSubtitle = settings.promo_banner_subtitle || (activeDiscount ? "FIXED PRICE STYLES" : "SELECT STYLES");
+
   return (
     <div className="bg-white text-black font-sans antialiased">
       
@@ -274,18 +280,15 @@ export default function Home() {
       <div className="bg-[#111111] text-[#9eff00] py-3 sm:py-4 border-b border-zinc-900 w-full select-none font-sans overflow-hidden">
         <div className="mx-auto max-w-[1920px] px-3 sm:px-6 md:px-12 lg:px-16 flex items-center justify-between gap-2 sm:gap-4 text-center">
           
-          {/* 1. Left Block: Sale Title (Single inline line on md/lg screens) */}
+          {/* 1. Left Block: Sale Title */}
           <div className="text-left shrink-0">
             <div className="hidden md:block text-[11px] sm:text-xs md:text-sm lg:text-[15px] font-black tracking-wider uppercase text-[#9eff00] whitespace-nowrap">
-              {activeDiscount ? `${activeDiscount.code} SALE` : "BACK TO SCHOOL SALE"}
+              {promoTitle}
             </div>
-            {/* Mobile fallback (2 lines on small screens) */}
+            {/* Mobile view */}
             <div className="md:hidden leading-tight">
               <div className="text-[10px] sm:text-xs font-black tracking-wider uppercase text-[#9eff00]">
-                {activeDiscount ? activeDiscount.code : "BACK TO SCHOOL"}
-              </div>
-              <div className="text-[9px] sm:text-[11px] font-black tracking-widest uppercase text-[#9eff00]">
-                SALE
+                {promoTitle}
               </div>
             </div>
           </div>
@@ -293,22 +296,19 @@ export default function Home() {
           {/* 2. Middle Block: Discount Offer */}
           <div className="text-center leading-tight shrink-0">
             <div className="text-[10px] sm:text-xs md:text-sm font-extrabold uppercase tracking-wider text-[#9eff00]">
-              {activeDiscount 
-                ? `EXTRA ${activeDiscount.type === "PERCENTAGE" ? `${activeDiscount.discountValue}%` : `৳${activeDiscount.discountValue}`} OFF`
-                : "EXTRA 25% OFF"
-              }
+              {promoOffer}
             </div>
             <div className="text-[9px] sm:text-[11px] md:text-sm font-extrabold uppercase tracking-widest text-[#9eff00]">
-              {activeDiscount ? "FIXED PRICE STYLES" : "SELECT STYLES"}
+              {promoSubtitle}
             </div>
           </div>
 
-          {/* 3. Logo Block: Pristto Logo (Shown on large screens like Nike's screenshot) */}
+          {/* 3. Logo Block */}
           <div className="hidden lg:flex items-center shrink-0 px-2">
             <img 
-              src="/main-logo.jpg" 
+              src="/main-logo.svg" 
               alt="Pristto Logo" 
-              className="h-9 lg:h-11 xl:h-12 w-auto object-contain select-none cursor-pointer" 
+              className="h-6 lg:h-8 xl:h-8 w-auto object-contain select-none cursor-pointer invert" 
             />
           </div>
 
@@ -316,14 +316,13 @@ export default function Home() {
           <div className="flex justify-end items-center shrink-0">
             <button
               onClick={() => {
-                const code = activeDiscount ? activeDiscount.code : "DAYONE";
-                navigator.clipboard.writeText(code);
-                toast.success(`Coupon code "${code}" copied!`);
+                navigator.clipboard.writeText(promoCode);
+                toast.success(`Coupon code "${promoCode}" copied!`);
               }}
               className="inline-flex items-center gap-1 text-[10px] sm:text-xs md:text-sm font-extrabold tracking-wider uppercase text-[#9eff00] hover:text-white transition-colors cursor-pointer select-none whitespace-nowrap"
               title="Click to copy coupon code"
             >
-              CODE: {activeDiscount ? activeDiscount.code : "DAYONE"}
+              CODE: {promoCode}
               <Copy className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#9eff00] shrink-0" />
             </button>
           </div>
@@ -596,7 +595,7 @@ export default function Home() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-2 sm:gap-x-6 gap-y-6 sm:gap-y-10">
             {productsList.slice(0, 4).map((product: any) => {
               const discountedPrice =
                 product.discount > 0
@@ -613,7 +612,7 @@ export default function Home() {
                   className="w-full group flex flex-col relative cursor-pointer"
                 >
                   {/* Image container: Nike aspect-square with #f6f6f6 bg */}
-                  <div className="relative w-full aspect-square bg-[#f6f6f6] overflow-hidden mb-2 sm:mb-3 cursor-pointer flex items-center justify-center">
+                  <div className="relative w-full aspect-square bg-[#f6f6f6] overflow-hidden mb-1.5 cursor-pointer flex items-center justify-center">
                     {product.images?.[0] ? (
                       <img
                         src={product.images[0]}
@@ -631,8 +630,24 @@ export default function Home() {
                     <Link href={`/products/${product.slug}`} className="absolute inset-0 z-10 cursor-pointer" aria-label={product.title} />
                   </div>
 
-                  {/* Nike Info Hierarchy: Title -> Subtitle -> Price */}
-                  <div className="flex flex-col px-0.5">
+                  {/* Nike Colorway Swatches Bar (px-2 on mobile only, flush md:px-0 on desktop) */}
+                  {product.images && product.images.length > 1 && (
+                    <div className="flex items-center gap-1.5 overflow-x-auto py-1 mb-1 px-2 md:px-0 scrollbar-none min-h-[32px]">
+                      {product.images.slice(0, 8).map((img: string, idx: number) => (
+                        <div
+                          key={idx}
+                          className={`w-7 h-7 sm:w-8 sm:h-8 rounded-sm bg-[#f6f6f6] border overflow-hidden shrink-0 transition cursor-pointer ${
+                            idx === 0 ? "border-black" : "border-gray-200 hover:border-gray-400"
+                          }`}
+                        >
+                          <img src={img} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Nike Info Hierarchy: Title -> Subtitle -> Price (px-2 on mobile only, flush md:px-0 on desktop) */}
+                  <div className="flex flex-col px-2 md:px-0 mt-0.5">
                     <Link 
                       href={`/products/${product.slug}`}
                       className="text-sm sm:text-[15px] font-semibold text-[#111111] truncate cursor-pointer leading-tight"
@@ -850,9 +865,11 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Left Column: Tall Perfume Card (Responsive height scaling for laptop/desktop) */}
-          <div className="relative group overflow-hidden bg-zinc-900 aspect-[3/4] md:aspect-auto h-[480px] sm:h-[580px] md:h-[640px] lg:h-[720px] xl:h-[900px] 2xl:h-[1316px] cursor-pointer">
+        {/* Outer Container: 1 column on mobile, 2 columns on desktop (old desktop look preserved) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+          
+          {/* Left Column (Desktop: Tall Fragrance Card; Mobile: Full Width Fragrance Banner) */}
+          <div className="relative group overflow-hidden bg-zinc-900 w-full h-[360px] sm:h-[480px] md:h-[640px] lg:h-[720px] xl:h-[900px] 2xl:h-[1316px] cursor-pointer">
             <img
               src="/landing-purfume.avif"
               alt="Shop Fragrance"
@@ -860,7 +877,7 @@ export default function Home() {
               loading="lazy"
             />
             {/* Softened black gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent z-10 cursor-pointer" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10 cursor-pointer" />
             
             {/* Bottom-Left Title Overlay */}
             <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8 z-20 pointer-events-none">
@@ -872,10 +889,10 @@ export default function Home() {
             <Link href="/shop?category=accessories" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Fragrance" />
           </div>
 
-          {/* Right Column: 2 Stacked Watch Cards (Flex layout dynamically dividing left column height) */}
-          <div className="flex flex-col gap-4 h-full">
-            {/* Top Right Card: Watch 1 */}
-            <div className="relative group overflow-hidden bg-zinc-900 aspect-[16/9] sm:aspect-[2/1] md:aspect-auto flex-1 min-h-[220px] md:min-h-[300px] cursor-pointer">
+          {/* Right Column (Desktop: 2 Stacked Watch Cards; Mobile: 2 Watch Cards with 360px height) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-col gap-4 h-full w-full">
+            {/* Watch Card 1 */}
+            <div className="relative group overflow-hidden bg-zinc-900 w-full flex-1 h-[360px] md:h-full md:min-h-[300px] cursor-pointer">
               <img
                 src="/landing-watch-1.jpg"
                 alt="Shop Timepieces"
@@ -895,8 +912,8 @@ export default function Home() {
               <Link href="/shop?category=accessories" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Timepieces" />
             </div>
 
-            {/* Bottom Right Card: Watch 2 */}
-            <div className="relative group overflow-hidden bg-zinc-900 aspect-[16/9] sm:aspect-[2/1] md:aspect-auto flex-1 min-h-[220px] md:min-h-[300px] cursor-pointer">
+            {/* Watch Card 2 */}
+            <div className="relative group overflow-hidden bg-zinc-900 w-full flex-1 h-[360px] md:h-full md:min-h-[300px] cursor-pointer">
               <img
                 src="/landing-watch-2.jpg"
                 alt="Shop Luxury Watches"
@@ -916,6 +933,7 @@ export default function Home() {
               <Link href="/shop?category=accessories" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Luxury Watches" />
             </div>
           </div>
+
         </div>
       </section>
 
@@ -1055,9 +1073,9 @@ export default function Home() {
           </div>
           {/* Pristto brand icon */}
           <img 
-            src="/main-logo.jpg" 
+            src="/main-logo.svg" 
             alt="Pristto Logo" 
-            className="h-14 w-auto object-contain mx-auto mt-8 select-none" 
+            className="h-8 lg:h-10 xl:h-10 w-auto object-contain mx-auto mt-8 select-none invert" 
           />
         </div>
       </section>
