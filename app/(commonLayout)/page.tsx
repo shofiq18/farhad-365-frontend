@@ -949,11 +949,11 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-          {/* Card 1: Jordan Kids */}
+          {/* Card 1: School Shoes */}
           <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer rounded-none">
             <img
-              src="/original.avif"
-              alt="Jordan Kids"
+              src="/original.jpg"
+              alt="School Shoes"
               className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
               loading="lazy"
             />
@@ -963,19 +963,19 @@ export default function Home() {
                 Bring serious style to their everyday game.
               </p>
               <Link
-                href="/shop?search=Jordan"
+                href="/shop?category=footwear&targetGroup=SCHOOL"
                 className="bg-white text-black text-xs font-bold px-5 py-2.5 rounded-full hover:bg-zinc-200 transition-colors uppercase tracking-wider cursor-pointer"
               >
-                Jordan Kids
+                Shop School Shoes
               </Link>
             </div>
-            <Link href="/shop?search=Jordan" className="absolute inset-0 z-30 cursor-pointer" />
+            <Link href="/shop?category=footwear&targetGroup=SCHOOL" className="absolute inset-0 z-30 cursor-pointer" />
           </div>
 
           {/* Card 2: Bags & Backpacks */}
           <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer rounded-none">
             <img
-              src="/original (1).avif"
+              src="/original(1).webp"
               alt="Bags & Backpacks"
               className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
               loading="lazy"
@@ -995,11 +995,11 @@ export default function Home() {
             <Link href="/shop?category=accessories&search=bag" className="absolute inset-0 z-30 cursor-pointer" />
           </div>
 
-          {/* Card 3: Nike Kids */}
+          {/* Card 3: Kids Shoes */}
           <div className="group relative flex flex-col justify-end aspect-[4/5] overflow-hidden bg-zinc-950 cursor-pointer rounded-none">
             <img
               src="/original (2).avif"
-              alt="Nike Kids"
+              alt="Kids Shoes"
               className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
               loading="lazy"
             />
@@ -1009,13 +1009,13 @@ export default function Home() {
                 Elevate their school style with essentials for the classroom and sport.
               </p>
               <Link
-                href="/shop?targetGroup=KIDS"
+                href="/shop?category=footwear&targetGroup=KIDS"
                 className="bg-white text-black text-xs font-bold px-5 py-2.5 rounded-full hover:bg-zinc-200 transition-colors uppercase tracking-wider cursor-pointer"
               >
-                Nike Kids
+                Kids Shoes
               </Link>
             </div>
-            <Link href="/shop?targetGroup=KIDS" className="absolute inset-0 z-30 cursor-pointer" />
+            <Link href="/shop?category=footwear&targetGroup=KIDS" className="absolute inset-0 z-30 cursor-pointer" />
           </div>
         </div>
       </section>
