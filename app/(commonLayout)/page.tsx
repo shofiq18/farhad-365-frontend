@@ -694,7 +694,7 @@ export default function Home() {
                 className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
                 loading="lazy"
               />
-              <Link href="/shop?targetGroup=UNISEX" className="absolute inset-0 z-20 cursor-pointer" />
+              <Link href="/shop?category=clothing&targetGroup=MEN" className="absolute inset-0 z-20 cursor-pointer" />
             </div>
             <div className="mt-4 sm:mt-5 px-3 sm:px-0">
               <h3 className="text-sm sm:text-[15px] font-medium text-black tracking-tight cursor-pointer">
@@ -704,7 +704,7 @@ export default function Home() {
                 Reimagined everyday basics designed to look completely effortless, anywhere and everywhere.
               </p>
               <Link 
-                href="/shop?targetGroup=UNISEX" 
+                href="/shop?category=clothing&targetGroup=MEN" 
                 className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-2.5 sm:mt-3.5 tracking-wide transition cursor-pointer"
               >
                 Shop Streetwear
@@ -721,7 +721,7 @@ export default function Home() {
                 className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
                 loading="lazy"
               />
-              <Link href="/shop?category=clothing" className="absolute inset-0 z-20 cursor-pointer" />
+              <Link href="/shop?category=activewear&targetGroup=SPORTS" className="absolute inset-0 z-20 cursor-pointer" />
             </div>
             <div className="mt-4 sm:mt-5 px-3 sm:px-0">
               <h3 className="text-sm sm:text-[15px] font-medium text-black tracking-tight cursor-pointer">
@@ -731,7 +731,7 @@ export default function Home() {
                 Sweat-wicking performance clothing built to withstand high-intensity reps and active training.
               </p>
               <Link 
-                href="/shop?category=clothing" 
+                href="/shop?category=activewear&targetGroup=SPORTS" 
                 className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-2.5 sm:mt-3.5 tracking-wide transition cursor-pointer"
               >
                 Shop Training
