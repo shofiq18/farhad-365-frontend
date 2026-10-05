@@ -53,7 +53,7 @@ export default function CartDrawer() {
   const subtotal = items.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
 
   // Dynamic free shipping threshold & delivery fees from settings
-  const threshold = settings.free_shipping_threshold ? parseFloat(settings.free_shipping_threshold) : 1000;
+  const threshold = settings.free_shipping_threshold ? parseFloat(settings.free_shipping_threshold) : 2000;
   const insideDhakaFee = settings.inside_dhaka_shipping ? parseFloat(settings.inside_dhaka_shipping) : 80;
   const outsideDhakaFee = settings.outside_dhaka_shipping ? parseFloat(settings.outside_dhaka_shipping) : 120;
   const isFreeShipping = subtotal >= threshold;

@@ -19,7 +19,7 @@ const FAQS: FAQItem[] = [
   {
     category: "orders",
     question: "How long does shipping take?",
-    answer: "Deliveries inside Dhaka take 1 - 2 business days. Outside Dhaka deliveries take 3 - 5 business days. Express same-day delivery is available for orders placed inside Dhaka before 12:00 PM.",
+    answer: "Deliveries inside Dhaka take 1 - 2 business days. Outside Dhaka deliveries take 3 - 5 business days.",
   },
   {
     category: "payments",

@@ -545,8 +545,12 @@ export default function Home() {
         </div>
 
         {isCategoriesLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="animate-spin h-8 w-8 text-black" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-6 animate-pulse">
+            {[...Array(3)].map((_, idx) => (
+              <div key={idx} className="aspect-[4/5] bg-gray-200 relative rounded-none">
+                <div className="absolute bottom-6 left-6 h-6 w-32 bg-gray-300 rounded" />
+              </div>
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-6">
@@ -584,8 +588,15 @@ export default function Home() {
         </div>
 
         {isProductsLoading ? (
-          <div className="flex justify-center items-center py-24">
-            <Loader2 className="animate-spin h-8 w-8 text-black" />
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-2 sm:gap-x-6 gap-y-6 sm:gap-y-10 animate-pulse">
+            {[...Array(4)].map((_, idx) => (
+              <div key={idx} className="flex flex-col space-y-3">
+                <div className="w-full aspect-square bg-gray-200" />
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-3.5 bg-gray-200 rounded w-1/2" />
+                <div className="h-4 bg-gray-200 rounded w-1/4" />
+              </div>
+            ))}
           </div>
         ) : productsList.length === 0 ? (
           <div className="border border-dashed border-gray-300 rounded-2xl text-center py-20 bg-gray-50">

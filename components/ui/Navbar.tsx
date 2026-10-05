@@ -294,11 +294,11 @@ export default function Navbar() {
 
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Link href="/" className="flex items-center group">
+              <Link href="/" className="flex items-center">
                 <img 
                   src="/main-logo.svg" 
                   alt="Pristto Logo" 
-                  className="h-8 lg:h-10 xl:h-10 w-auto object-contain transition duration-200 group-hover:scale-105 select-none mix-blend-multiply" 
+                  className="h-8 lg:h-10 xl:h-10 w-auto object-contain select-none mix-blend-multiply" 
                 />
               </Link>
             </div>

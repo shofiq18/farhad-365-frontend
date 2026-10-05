@@ -115,8 +115,26 @@ export default function ProductDetailsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <Loader className="animate-spin h-8 w-8 text-black" />
+      <div className="min-h-screen bg-white text-black font-sans antialiased py-12">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 animate-pulse">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
+            <div className="lg:col-span-7 flex flex-col-reverse md:flex-row gap-4">
+              <div className="flex md:flex-col gap-3">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="w-16 h-16 bg-gray-200" />
+                ))}
+              </div>
+              <div className="flex-1 aspect-[4/5] bg-gray-200" />
+            </div>
+            <div className="lg:col-span-5 space-y-6">
+              <div className="h-4 bg-gray-200 rounded w-1/4" />
+              <div className="h-8 bg-gray-200 rounded w-3/4" />
+              <div className="h-6 bg-gray-200 rounded w-1/3" />
+              <div className="h-24 bg-gray-200 rounded w-full" />
+              <div className="h-12 bg-gray-200 rounded-full w-full" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -541,7 +559,7 @@ export default function ProductDetailsPage() {
                 {openAccordions.shipping && (
                   <div className="pb-5 text-xs text-gray-500 leading-relaxed space-y-2">
                     <p>
-                      Free standard shipping on orders over ৳{(settings.free_shipping_threshold ? parseFloat(settings.free_shipping_threshold).toLocaleString() : "1,000")}. Delivery takes 3–7 business days once processed.
+                      Free standard shipping on orders over ৳{(settings.free_shipping_threshold ? parseFloat(settings.free_shipping_threshold).toLocaleString() : "2,000")}. Delivery takes 3–7 business days once processed.
                     </p>
                     <p>
                       You can return your purchase for any reason within 30 days of delivery, completely free of charge. Some exclusions apply.

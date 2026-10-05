@@ -25,6 +25,13 @@ export default function ShippingPage() {
             We partner with premier domestic logistics networks to dispatch your packages securely.
           </p>
           
+          {/* Delivery Info Card */}
+          <div className="bg-zinc-900 text-white border border-zinc-800 rounded-2xl p-5 md:p-6 text-center my-4 shadow-sm">
+            <p className="text-sm md:text-base font-extrabold tracking-wide uppercase text-zinc-100">
+              Free shipping on orders over ৳2,000 <span className="text-zinc-500 font-normal px-1">|</span> Delivery Inside Dhaka ৳80 <span className="text-zinc-500 font-normal px-1">|</span> Outside Dhaka ৳120
+            </p>
+          </div>
+
           <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mt-6">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -40,13 +47,7 @@ export default function ShippingPage() {
                   <td className="py-4 px-6 font-bold text-black">Inside Dhaka</td>
                   <td className="py-4 px-6">Home Delivery</td>
                   <td className="py-4 px-6">1 - 2 Days</td>
-                  <td className="py-4 px-6 text-right font-bold text-black">৳60</td>
-                </tr>
-                <tr>
-                  <td className="py-4 px-6 font-bold text-black">Inside Dhaka (Express)</td>
-                  <td className="py-4 px-6">Same-Day Courier</td>
-                  <td className="py-4 px-6">Within 24 Hours</td>
-                  <td className="py-4 px-6 text-right font-bold text-black">৳150</td>
+                  <td className="py-4 px-6 text-right font-bold text-black">৳80</td>
                 </tr>
                 <tr>
                   <td className="py-4 px-6 font-bold text-black">Outside Dhaka</td>

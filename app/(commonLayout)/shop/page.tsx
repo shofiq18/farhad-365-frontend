@@ -500,8 +500,15 @@ export default function ShopPage() {
         {/* ── PRODUCT GRID ── */}
         <main className={`flex-1 py-6 ${showFilters ? "md:pl-8" : ""}`}>
           {isLoading || isFetching ? (
-            <div className="flex justify-center items-center py-32">
-              <Loader className="animate-spin h-8 w-8 text-black" />
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-x-2 sm:gap-x-6 gap-y-6 sm:gap-y-10 animate-pulse">
+              {[...Array(9)].map((_, idx) => (
+                <div key={idx} className="flex flex-col space-y-3">
+                  <div className="w-full aspect-square bg-gray-200" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3.5 bg-gray-200 rounded w-1/2" />
+                  <div className="h-4 bg-gray-200 rounded w-1/3" />
+                </div>
+              ))}
             </div>
           ) : productsData?.data?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32 text-center">
