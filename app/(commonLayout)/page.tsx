@@ -53,25 +53,25 @@ const STATIC_TRENDING_FALLBACKS = [
 ];
 
 const SPECIAL_CAROUSEL_SLIDES = [
-   {
+  {
     image: "/corousal3.webp",
     tag: "WOMEN'S COLLECTION",
     title: "ELEVATE YOUR WORKOUT",
     subtitle: "Premium performance sportswear designed for maximum flexibility, breathability, and comfort.",
     primaryBtnText: "Shop Men's",
     primaryLink: "/shop?targetGroup=MEN",
-    secondaryBtnText: "View Collection",
-    secondaryLink: "/shop",
+    secondaryBtnText: "Shop Unisex",
+    secondaryLink: "/shop?targetGroup=UNISEX",
   },
-   {
+  {
     image: "/corousal4.webp",
     tag: "PRO PERFORMANCE",
     title: "DOMINATE THE STAGE",
     subtitle: "Unmatched speed meets elite comfort. Push your boundaries and exceed your goals daily.",
     primaryBtnText: "Shop Women's",
     primaryLink: "/shop?targetGroup=WOMEN",
-    secondaryBtnText: "Shop All",
-    secondaryLink: "/shop",
+    secondaryBtnText: "Shop Unisex",
+    secondaryLink: "/shop?targetGroup=UNISEX",
   },
   {
     image: "/corousal2.avif",
@@ -80,8 +80,8 @@ const SPECIAL_CAROUSEL_SLIDES = [
     subtitle: "Step into limitlessness with our brand new seasonal collections. Engineered with lightweight, premium fabrics designed for peak movement and performance.",
     primaryBtnText: "Shop Collection",
     primaryLink: "/shop",
-    secondaryBtnText: "Shop Accessories",
-    secondaryLink: "/shop?category=accessories",
+    secondaryBtnText: "Shop Unisex",
+    secondaryLink: "/shop?targetGroup=UNISEX",
   },
   {
     image: "/corousal1.webp",
@@ -89,21 +89,19 @@ const SPECIAL_CAROUSEL_SLIDES = [
     title: "THE STANDARD IS SET",
     subtitle: "Experience next-level cushioning and support engineered for daily runners and active athletes.",
     primaryBtnText: "Shop Footwear",
-    primaryLink: "/shop?category=shoes",
-    secondaryBtnText: "Explore Running",
+    primaryLink: "/shop?category=footwear",
+    secondaryBtnText: "Explore Sports",
     secondaryLink: "/shop?targetGroup=SPORTS",
   },
- 
- 
   {
     image: "/corousal6.webp",
     tag: "LUXURY FRAGRANCE",
     title: "SIGNATURE SCENTS",
     subtitle: "Discover iconic fragrances crafted to complement your style with lasting elegance.",
     primaryBtnText: "Shop Perfumes",
-    primaryLink: "/shop?category=accessories",
-    secondaryBtnText: "Explore Shop",
-    secondaryLink: "/shop",
+    primaryLink: "/shop?category=perfumes",
+    secondaryBtnText: "Shop Unisex",
+    secondaryLink: "/shop?targetGroup=UNISEX",
   },
 ];
 
@@ -669,7 +667,7 @@ export default function Home() {
                 className="absolute inset-0 w-full h-full object-cover select-none cursor-pointer"
                 loading="lazy"
               />
-              <Link href="/shop?category=shoes" className="absolute inset-0 z-20 cursor-pointer" />
+              <Link href="/shop?category=footwear" className="absolute inset-0 z-20 cursor-pointer" />
             </div>
             <div className="mt-4 sm:mt-5 px-3 sm:px-0">
               <h3 className="text-sm sm:text-[15px] font-medium text-black tracking-tight cursor-pointer">
@@ -679,7 +677,7 @@ export default function Home() {
                 Ultra-responsive road runners engineered to cushion and accelerate every single step.
               </p>
               <Link 
-                href="/shop?category=shoes" 
+                href="/shop?category=footwear" 
                 className="inline-block text-xs font-semibold underline text-black hover:text-zinc-600 mt-2.5 sm:mt-3.5 tracking-wide transition cursor-pointer"
               >
                 Shop Footwear
@@ -777,10 +775,10 @@ export default function Home() {
                 Shop Collection
               </Link>
               <Link
-                href="/shop?targetGroup=MEN"
+                href="/shop?targetGroup=UNISEX"
                 className="rounded-full bg-transparent text-white hover:bg-white/10 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase border-2 border-white"
               >
-                Shop Men&#39;s
+                Shop Unisex
               </Link>
             </div>
           </div>
@@ -819,7 +817,7 @@ export default function Home() {
               </span>
             </div>
 
-            <Link href="/shop?category=accessories" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Fragrance" />
+            <Link href="/shop?category=perfumes" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Fragrance" />
           </div>
 
           {/* Right Column (Desktop: 2 Stacked Watch Cards; Mobile: 2 Watch Cards with 360px height) */}
@@ -842,7 +840,7 @@ export default function Home() {
                 </span>
               </div>
 
-              <Link href="/shop?category=accessories" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Timepieces" />
+              <Link href="/shop?category=watches" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Timepieces" />
             </div>
 
             {/* Watch Card 2 */}
@@ -863,7 +861,7 @@ export default function Home() {
                 </span>
               </div>
 
-              <Link href="/shop?category=accessories" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Luxury Watches" />
+              <Link href="/shop?category=watches" className="absolute inset-0 z-30 cursor-pointer" aria-label="Shop Luxury Watches" />
             </div>
           </div>
 
@@ -896,13 +894,13 @@ export default function Home() {
                 Bring serious style to their everyday game.
               </p>
               <Link
-                href="/shop?category=footwear&targetGroup=SCHOOL"
+                href="/shop?category=school-shoes&targetGroup=SCHOOL"
                 className="bg-white text-black text-xs font-bold px-5 py-2.5 rounded-full hover:bg-zinc-200 transition-colors uppercase tracking-wider cursor-pointer"
               >
                 Shop School Shoes
               </Link>
             </div>
-            <Link href="/shop?category=footwear&targetGroup=SCHOOL" className="absolute inset-0 z-30 cursor-pointer" />
+            <Link href="/shop?category=school-shoes&targetGroup=SCHOOL" className="absolute inset-0 z-30 cursor-pointer" />
           </div>
 
           {/* Card 2: Bags & Backpacks */}
@@ -919,13 +917,13 @@ export default function Home() {
                 Find the perfect bag for carrying their gear comfortably.
               </p>
               <Link
-                href="/shop?category=accessories&search=bag"
+                href="/shop?category=school-bags&targetGroup=SCHOOL"
                 className="bg-white text-black text-xs font-bold px-5 py-2.5 rounded-full hover:bg-zinc-200 transition-colors uppercase tracking-wider cursor-pointer"
               >
                 Bags & Backpacks
               </Link>
             </div>
-            <Link href="/shop?category=accessories&search=bag" className="absolute inset-0 z-30 cursor-pointer" />
+            <Link href="/shop?category=school-bags&targetGroup=SCHOOL" className="absolute inset-0 z-30 cursor-pointer" />
           </div>
 
           {/* Card 3: Kids Shoes */}
@@ -942,13 +940,13 @@ export default function Home() {
                 Elevate their school style with essentials for the classroom and sport.
               </p>
               <Link
-                href="/shop?category=footwear&targetGroup=KIDS"
+                href="/shop?category=school-shoes&targetGroup=KIDS"
                 className="bg-white text-black text-xs font-bold px-5 py-2.5 rounded-full hover:bg-zinc-200 transition-colors uppercase tracking-wider cursor-pointer"
               >
                 Kids Shoes
               </Link>
             </div>
-            <Link href="/shop?category=footwear&targetGroup=KIDS" className="absolute inset-0 z-30 cursor-pointer" />
+            <Link href="/shop?category=school-shoes&targetGroup=KIDS" className="absolute inset-0 z-30 cursor-pointer" />
           </div>
         </div>
       </section>
