@@ -639,10 +639,10 @@ export default function Home() {
           </p>
           <div>
             <Link
-              href="/shop"
+              href="/shop?category=sports-shoes"
               className="inline-flex items-center gap-2 rounded-full bg-white text-black hover:bg-zinc-100 transition duration-300 py-3 px-7 sm:py-3 sm:px-8 text-xs font-bold tracking-wider uppercase"
             >
-              Explore Activewear <span className="text-sm">→</span>
+              Shop Sports Shoes <span className="text-sm">→</span>
             </Link>
           </div>
         </div>
