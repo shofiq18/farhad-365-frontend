@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGetProductsQuery } from "@/redux/api/product/productApi";
 import { useGetCategoriesQuery } from "@/redux/api/category/categoryApi";
-import { ChevronDown, ChevronUp, SlidersHorizontal, X, Loader, Check } from "lucide-react";
+import { ChevronDown, ChevronUp, SlidersHorizontal, X, Check } from "lucide-react";
 import Link from "next/link";
+import ProductCard from "@/components/ui/ProductCard";
 
 const TARGET_GROUPS = ["MEN", "WOMEN", "KIDS", "UNISEX", "SCHOOL", "SPORTS"] as const;
 
@@ -531,79 +532,9 @@ export default function ShopPage() {
               <div
                 className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-x-2 sm:gap-x-6 gap-y-6 sm:gap-y-10"
               >
-                {productsData?.data?.map((product: any) => {
-                  const discountedPrice =
-                    product.discount > 0
-                      ? product.price * (1 - product.discount / 100)
-                      : null;
-
-                  const subtitle = product.targetGroup && product.category?.name
-                    ? `${product.targetGroup.charAt(0) + product.targetGroup.slice(1).toLowerCase()}'s ${product.category.name}`
-                    : product.category?.name || "Sportswear";
-
-                  return (
-                    <Link
-                      key={product.id}
-                      href={`/products/${product.slug}`}
-                      className="group flex flex-col cursor-pointer"
-                    >
-                      {/* Product Image: Nike aspect-square with #f6f6f6 bg */}
-                      <div className="w-full aspect-square overflow-hidden mb-1.5 flex-shrink-0 bg-[#f6f6f6] cursor-pointer relative flex items-center justify-center">
-                        {product.images?.[0] ? (
-                          <img
-                            src={product.images[0]}
-                            alt={product.title}
-                            className="w-full h-full object-cover object-top cursor-pointer"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-[#f6f6f6]" />
-                        )}
-                      </div>
-
-                      {/* Nike Colorway Swatches Bar (px-2 on mobile only, flush md:px-0 on desktop) */}
-                      {product.images && product.images.length > 1 && (
-                        <div className="flex items-center gap-1.5 overflow-x-auto py-1 mb-1 px-2 md:px-0 scrollbar-none min-h-[32px]">
-                          {product.images.slice(0, 8).map((img: string, idx: number) => (
-                            <div
-                              key={idx}
-                              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-sm bg-[#f6f6f6] border overflow-hidden shrink-0 transition cursor-pointer ${
-                                idx === 0 ? "border-black" : "border-gray-200 hover:border-gray-400"
-                              }`}
-                            >
-                              <img src={img} alt="" className="w-full h-full object-cover" />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Product Info - Nike exact hierarchy: Title -> Subtitle -> Price (px-2 on mobile only, flush md:px-0 on desktop) */}
-                      <div className="flex flex-col px-2 md:px-0 mt-0.5">
-                        <h3 className="text-sm sm:text-[15px] font-semibold text-[#111111] leading-tight truncate">
-                          {product.title}
-                        </h3>
-                        <p className="text-xs sm:text-sm font-normal text-[#757575] mt-0.5 truncate">
-                          {subtitle}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1 sm:mt-1.5">
-                          {discountedPrice ? (
-                            <>
-                              <span className="text-sm sm:text-[15px] font-semibold text-[#111111]">
-                                ৳{discountedPrice.toLocaleString()}
-                              </span>
-                              <span className="text-xs sm:text-sm text-[#757575] line-through">
-                                ৳{product.price.toLocaleString()}
-                              </span>
-                            </>
-                          ) : (
-                            <span className="text-sm sm:text-[15px] font-semibold text-[#111111]">
-                              ৳{product.price.toLocaleString()}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
+                {productsData?.data?.map((product: any) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
               </div>
 
               {/* Pagination */}
